@@ -3,58 +3,60 @@ package org.examle.aston_practice.list;
 import org.examle.aston_practice.api.ICustomList;
 
 /**
- * Абстрактный класс, представляющий базовый функционал списка.
+ * Abstract class representing basic functionality for a list.
  *
- * @param <T> Тип элементов в списке.
+ * @param <T> Type of elements in the list.
  */
 public abstract class CustomAbstractList<T extends Comparable<T>> implements ICustomList<T> {
     protected int size = 0;
 
     /**
-     * Добавляет элемент в конец списка.
+     * Adds an element to the end of the list.
      *
-     * @param element элемент для добавления.
+     * @param element Element to add.
      */
     public abstract void add(T element);
 
     /**
-     * Добавляет элемент в указанный индекс списка.
+     * Adds an element at the specified index in the list.
      *
-     * @param index   индекс для добавления элемента.
-     * @param element элемент для добавления.
+     * @param index   Index at which the element should be added.
+     * @param element Element to add.
      */
     public abstract void add(int index, T element);
 
     /**
-     * Возвращает элемент по указанному индексу.
+     * Retrieves the element at the specified index.
      *
-     * @param index индекс элемента.
-     * @return элемент по указанному индексу.
+     * @param index Index of the element.
+     * @return Element at the specified index.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     public abstract T get(int index);
 
     /**
-     * Удаляет элемент по указанному индексу.
+     * Removes the element at the specified index.
      *
-     * @param index индекс элемента для удаления.
-     * @return удаленный элемент.
+     * @param index Index of the element to remove.
+     * @return Removed element.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     public abstract T remove(int index);
 
     /**
-     * Очищает весь список.
+     * Clears the entire list.
      */
     public abstract void clear();
 
     /**
-     * Сортирует список методом пузырьковой сортировки.
+     * Sorts the list using bubble sort algorithm.
      */
     public void sort() {
         bubbleSort();
     }
 
     /**
-     * Реализация пузырьковой сортировки.
+     * Implementation of bubble sort algorithm for sorting elements in the list.
      */
     protected void bubbleSort() {
         for (int i = 0; i < size - 1; i++) {
@@ -70,37 +72,40 @@ public abstract class CustomAbstractList<T extends Comparable<T>> implements ICu
     }
 
     /**
-     * Сравнивает два элемента в списке по индексам.
+     * Compares two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
-     * @return результат сравнения.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
+     * @return Negative value if the first element is less than the second,
+     *         positive value if the first element is greater than the second,
+     *         zero if the elements are equal.
      */
     protected abstract int compare(int index1, int index2);
 
     /**
-     * Меняет местами два элемента в списке по индексам.
+     * Swaps two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
      */
     protected abstract void swap(int index1, int index2);
 
     /**
-     * Проверяет, что индекс находится в допустимом диапазоне.
+     * Checks if the index is within the valid range of the list.
      *
-     * @param index индекс для проверки.
+     * @param index Index to check.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     protected void checkIndex(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Индекс: " + index + ", Размер: " + size);
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
     }
 
     /**
-     * Возвращает размер списка.
+     * Returns the size of the list.
      *
-     * @return размер списка.
+     * @return Size of the list.
      */
     public int size() {
         return size;

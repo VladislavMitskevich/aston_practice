@@ -1,32 +1,33 @@
 package org.examle.aston_practice.list;
 
 /**
- * Реализация списка на основе динамического массива.
+ * Implementation of a list based on a dynamic array.
  *
- * @param <T> Тип элементов в списке.
+ * @param <T> Type of elements in the list.
  */
 public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList<T> {
     /**
-     * Массив для хранения элементов.
+     * Array to store elements.
      */
     private Object[] elements;
 
     /**
-     * Начальная емкость массива.
+     * Default capacity of the array.
      */
     private static final int DEFAULT_CAPACITY = 10;
 
     /**
-     * Конструктор по умолчанию.
+     * Default constructor.
+     * Initializes the array with default capacity.
      */
     public CustomArrayList() {
         elements = new Object[DEFAULT_CAPACITY];
     }
 
     /**
-     * Добавляет элемент в конец списка.
+     * Adds an element to the end of the list.
      *
-     * @param element элемент для добавления.
+     * @param element Element to add.
      */
     @Override
     public void add(T element) {
@@ -35,15 +36,16 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Добавляет элемент в указанный индекс списка.
+     * Adds an element at the specified index in the list.
      *
-     * @param index   индекс для добавления элемента.
-     * @param element элемент для добавления.
+     * @param index   Index at which the element should be added.
+     * @param element Element to add.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @Override
     public void add(int index, T element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Индекс: " + index + ", Размер: " + size);
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
         ensureCapacity(size + 1);
         System.arraycopy(elements, index, elements, index + 1, size - index);
@@ -52,10 +54,11 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Возвращает элемент по указанному индексу.
+     * Retrieves the element at the specified index.
      *
-     * @param index индекс элемента.
-     * @return элемент по указанному индексу.
+     * @param index Index of the element.
+     * @return Element at the specified index.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -65,10 +68,11 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Удаляет элемент по указанному индексу.
+     * Removes the element at the specified index.
      *
-     * @param index индекс элемента для удаления.
-     * @return удаленный элемент.
+     * @param index Index of the element to remove.
+     * @return Removed element.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -84,7 +88,7 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Очищает весь список.
+     * Clears the entire list.
      */
     @Override
     public void clear() {
@@ -95,11 +99,11 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Сравнивает два элемента в списке по индексам.
+     * Compares two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
-     * @return результат сравнения.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
+     * @return Result of comparison.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -108,10 +112,10 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Меняет местами два элемента в списке по индексам.
+     * Swaps two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
      */
     @Override
     protected void swap(int index1, int index2) {
@@ -121,9 +125,9 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
     }
 
     /**
-     * Обеспечивает достаточную емкость массива.
+     * Ensures that the array has enough capacity to accommodate a minimum capacity.
      *
-     * @param minCapacity минимальная необходимая емкость.
+     * @param minCapacity Minimum required capacity.
      */
     private void ensureCapacity(int minCapacity) {
         if (minCapacity > elements.length) {

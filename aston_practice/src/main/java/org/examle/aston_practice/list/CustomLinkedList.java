@@ -1,13 +1,13 @@
 package org.examle.aston_practice.list;
 
 /**
- * Реализация списка на основе связного списка.
+ * Implementation of a list based on a linked list.
  *
- * @param <T> Тип элементов в списке.
+ * @param <T> Type of elements in the list.
  */
 public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractList<T> {
     /**
-     * Узел связного списка.
+     * Node of the linked list.
      */
     private static class Node<T> {
         T item;
@@ -20,14 +20,14 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Голова списка.
+     * Head of the linked list.
      */
     private Node<T> head;
 
     /**
-     * Добавляет элемент в конец списка.
+     * Adds an element to the end of the list.
      *
-     * @param element элемент для добавления.
+     * @param element Element to add.
      */
     @Override
     public void add(T element) {
@@ -44,15 +44,16 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Добавляет элемент в указанный индекс списка.
+     * Adds an element at the specified index in the list.
      *
-     * @param index   индекс для добавления элемента.
-     * @param element элемент для добавления.
+     * @param index   Index at which the element should be added.
+     * @param element Element to add.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @Override
     public void add(int index, T element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Индекс: " + index + ", Размер: " + size);
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
         if (index == 0) {
             head = new Node<>(element, head);
@@ -67,10 +68,11 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Возвращает элемент по указанному индексу.
+     * Retrieves the element at the specified index.
      *
-     * @param index индекс элемента.
-     * @return элемент по указанному индексу.
+     * @param index Index of the element.
+     * @return Element at the specified index.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @Override
     public T get(int index) {
@@ -83,10 +85,11 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Удаляет элемент по указанному индексу.
+     * Removes the element at the specified index.
      *
-     * @param index индекс элемента для удаления.
-     * @return удаленный элемент.
+     * @param index Index of the element to remove.
+     * @return Removed element.
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     @Override
     public T remove(int index) {
@@ -108,7 +111,7 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Очищает весь список.
+     * Clears the entire list.
      */
     @Override
     public void clear() {
@@ -117,11 +120,11 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Сравнивает два элемента в списке по индексам.
+     * Compares two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
-     * @return результат сравнения.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
+     * @return Result of comparison.
      */
     @Override
     protected int compare(int index1, int index2) {
@@ -131,10 +134,10 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Меняет местами два элемента в списке по индексам.
+     * Swaps two elements in the list based on their indices.
      *
-     * @param index1 индекс первого элемента.
-     * @param index2 индекс второго элемента.
+     * @param index1 Index of the first element.
+     * @param index2 Index of the second element.
      */
     @Override
     protected void swap(int index1, int index2) {
@@ -146,10 +149,10 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
     }
 
     /**
-     * Возвращает узел по указанному индексу.
+     * Retrieves the node at the specified index.
      *
-     * @param index индекс узла.
-     * @return узел по указанному индексу.
+     * @param index Index of the node.
+     * @return Node at the specified index.
      */
     private Node<T> getNode(int index) {
         checkIndex(index);
