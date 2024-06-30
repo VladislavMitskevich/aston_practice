@@ -1,6 +1,7 @@
 package org.examle.aston_practice.list;
 
 import org.examle.aston_practice.api.ICustomList;
+import org.examle.aston_practice.exception.InvalidIndexException;
 
 /**
  * Abstract class representing basic functionality for a list.
@@ -30,7 +31,7 @@ public abstract class CustomAbstractList<T extends Comparable<T>> implements ICu
      *
      * @param index Index of the element.
      * @return Element at the specified index.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     public abstract T get(int index);
 
@@ -39,7 +40,7 @@ public abstract class CustomAbstractList<T extends Comparable<T>> implements ICu
      *
      * @param index Index of the element to remove.
      * @return Removed element.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     public abstract T remove(int index);
 
@@ -94,11 +95,11 @@ public abstract class CustomAbstractList<T extends Comparable<T>> implements ICu
      * Checks if the index is within the valid range of the list.
      *
      * @param index Index to check.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     protected void checkIndex(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new InvalidIndexException("Index: " + index + ", Size: " + size);
         }
     }
 
@@ -111,3 +112,4 @@ public abstract class CustomAbstractList<T extends Comparable<T>> implements ICu
         return size;
     }
 }
+

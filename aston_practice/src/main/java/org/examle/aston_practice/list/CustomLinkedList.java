@@ -1,5 +1,7 @@
 package org.examle.aston_practice.list;
 
+import org.examle.aston_practice.exception.InvalidIndexException;
+
 /**
  * Implementation of a list based on a linked list.
  *
@@ -48,12 +50,12 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
      *
      * @param index   Index at which the element should be added.
      * @param element Element to add.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @Override
     public void add(int index, T element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new InvalidIndexException("Index: " + index + ", Size: " + size);
         }
         if (index == 0) {
             head = new Node<>(element, head);
@@ -72,7 +74,7 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
      *
      * @param index Index of the element.
      * @return Element at the specified index.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @Override
     public T get(int index) {
@@ -89,7 +91,7 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
      *
      * @param index Index of the element to remove.
      * @return Removed element.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @Override
     public T remove(int index) {
@@ -161,5 +163,18 @@ public class CustomLinkedList<T extends Comparable<T>> extends CustomAbstractLis
             current = current.next;
         }
         return current;
+    }
+
+    /**
+     * Checks if the index is within the valid range of the list.
+     *
+     * @param index Index to check.
+     * @throws InvalidIndexException if the index is out of range.
+     */
+    @Override
+    protected void checkIndex(int index) {
+        if (index < 0 || index >= size) {
+            throw new InvalidIndexException("Index: " + index + ", Size: " + size);
+        }
     }
 }

@@ -1,5 +1,7 @@
 package org.examle.aston_practice.list;
 
+import org.examle.aston_practice.exception.InvalidIndexException;
+
 /**
  * Implementation of a list based on a dynamic array.
  *
@@ -40,12 +42,12 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
      *
      * @param index   Index at which the element should be added.
      * @param element Element to add.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @Override
     public void add(int index, T element) {
         if (index < 0 || index > size) {
-            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+            throw new InvalidIndexException("Index: " + index + ", Size: " + size);
         }
         ensureCapacity(size + 1);
         System.arraycopy(elements, index, elements, index + 1, size - index);
@@ -58,7 +60,7 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
      *
      * @param index Index of the element.
      * @return Element at the specified index.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @SuppressWarnings("unchecked")
     @Override
@@ -72,7 +74,7 @@ public class CustomArrayList<T extends Comparable<T>> extends CustomAbstractList
      *
      * @param index Index of the element to remove.
      * @return Removed element.
-     * @throws IndexOutOfBoundsException if the index is out of range.
+     * @throws InvalidIndexException if the index is out of range.
      */
     @SuppressWarnings("unchecked")
     @Override
