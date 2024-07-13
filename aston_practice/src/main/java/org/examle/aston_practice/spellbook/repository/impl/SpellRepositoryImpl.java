@@ -11,28 +11,23 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of SpellRepository using JDBC.
+ * Implementation of SpellRepository
  */
 public class SpellRepositoryImpl implements SpellRepository {
 
-    private final String url;
-    private final String user;
-    private final String password;
-
-    public SpellRepositoryImpl(String url, String user, String password) {
-        this.url = url;
-        this.user = user;
-        this.password = password;
-    }
+    private static final String URL = "jdbc:mysql://localhost:3306/spellbook";
+    private static final String USER = "root";
+    private static final String PASSWORD = "password";
 
     @Override
     public List<Spell> findAll() {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM spells")) {
             while (resultSet.next()) {
-                spells.add(mapResultSetToSpell(resultSet));
+                Spell spell = mapResultSetToSpell(resultSet);
+                spells.add(spell);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -42,7 +37,7 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public Optional<Spell> findById(Long id) {
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -58,7 +53,7 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public void save(Spell spell) {
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO spells (name, description, school, circle, spell_class) VALUES (?, ?, ?, ?, ?)")) {
             statement.setString(1, spell.getName());
@@ -74,7 +69,7 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public void update(Spell spell) {
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
                      "UPDATE spells SET name = ?, description = ?, school = ?, circle = ?, spell_class = ? WHERE id = ?")) {
             statement.setString(1, spell.getName());
@@ -91,7 +86,7 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public void delete(Long id) {
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement("DELETE FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
             statement.executeUpdate();
@@ -101,49 +96,17 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public List<Spell> findByClass(Long classId) {
+    public List<Spell> findByClassAndCircle(String spellClass, String circle) {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(url, user, password);
+        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT s.* FROM spells s JOIN spell_class sc ON s.id = sc.spell_id WHERE sc.class_id = ?")) {
-            statement.setLong(1, classId);
+                     "SELECT * FROM spells WHERE spell_class = ? AND circle = ?")) {
+            statement.setString(1, spellClass);
+            statement.setString(2, circle);
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
-                    spells.add(mapResultSetToSpell(resultSet));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return spells;
-    }
-
-    @Override
-    public List<Spell> findByCircle(String circle) {
-        List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE circle = ?")) {
-            statement.setString(1, circle);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    spells.add(mapResultSetToSpell(resultSet));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return spells;
-    }
-
-    @Override
-    public List<Spell> findBySchool(String school) {
-        List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(url, user, password);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE school = ?")) {
-            statement.setString(1, school);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    spells.add(mapResultSetToSpell(resultSet));
+                    Spell spell = mapResultSetToSpell(resultSet);
+                    spells.add(spell);
                 }
             }
         } catch (SQLException e) {

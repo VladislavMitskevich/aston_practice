@@ -11,62 +11,75 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Servlet for handling HTTP requests for spells.
+ * Servlet for handling spell-related requests
  */
-@WebServlet("/spells")
+@WebServlet("/spells/*")
 public class SpellServlet extends HttpServlet {
 
-    private SpellService spellService;
-    private ObjectMapper objectMapper;
+    private final SpellService spellService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Override
-    public void init() throws ServletException {
-        spellService = (SpellService) getServletContext().getAttribute("spellService");
-        objectMapper = new ObjectMapper();
+    public SpellServlet(SpellService spellService) {
+        this.spellService = spellService;
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String classParam = req.getParameter("class");
-        String circleParam = req.getParameter("circle");
-        String schoolParam = req.getParameter("school");
-
-        List<SpellDTO> spells;
-
-        if (classParam != null) {
-            spells = spellService.getSpellsByClass(classParam);
-        } else if (circleParam != null) {
-            spells = spellService.getSpellsByCircle(circleParam);
-        } else if (schoolParam != null) {
-            spells = spellService.getSpellsBySchool(schoolParam);
+        String pathInfo = req.getPathInfo();
+        if (pathInfo == null || pathInfo.equals("/")) {
+            List<SpellDTO> spells = spellService.findAll();
+            resp.setContentType("application/json");
+            resp.getWriter().write(objectMapper.writeValueAsString(spells));
         } else {
-            spells = spellService.getAllSpells();
+            String[] pathParts = pathInfo.split("/");
+            if (pathParts.length == 2) {
+                Long id = Long.parseLong(pathParts[1]);
+                Optional<SpellDTO> spellDTO = spellService.findById(id);
+                if (spellDTO.isPresent()) {
+                    resp.setContentType("application/json");
+                    resp.getWriter().write(objectMapper.writeValueAsString(spellDTO.get()));
+                } else {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                }
+            } else if (pathParts.length == 3 && pathParts[1].contains("(") && pathParts[1].contains(")")) {
+                String[] classAndCircle = pathParts[1].split("\\(");
+                String spellClass = classAndCircle[0];
+                String circle = classAndCircle[1].replace(")", "");
+                List<SpellDTO> spells = spellService.findByClassAndCircle(spellClass, circle);
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(spells));
+            } else {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            }
         }
-
-        resp.setContentType("application/json");
-        objectMapper.writeValue(resp.getOutputStream(), spells);
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SpellDTO spellDTO = objectMapper.readValue(req.getInputStream(), SpellDTO.class);
-        spellService.createSpell(spellDTO);
+        spellService.save(spellDTO);
         resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         SpellDTO spellDTO = objectMapper.readValue(req.getInputStream(), SpellDTO.class);
-        spellService.updateSpell(spellDTO);
+        spellService.update(spellDTO);
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Long id = Long.valueOf(req.getParameter("id"));
-        spellService.deleteSpell(id);
-        resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        String pathInfo = req.getPathInfo();
+        if (pathInfo != null && pathInfo.split("/").length == 2) {
+            Long id = Long.parseLong(pathInfo.split("/")[1]);
+            spellService.delete(id);
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } else {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        }
     }
 }

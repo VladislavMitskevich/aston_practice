@@ -7,10 +7,11 @@ import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.SpellService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of SpellService.
+ * Implementation of SpellService
  */
 public class SpellServiceImpl implements SpellService {
 
@@ -21,53 +22,37 @@ public class SpellServiceImpl implements SpellService {
     }
 
     @Override
-    public List<SpellDTO> getAllSpells() {
+    public List<SpellDTO> findAll() {
         return spellRepository.findAll().stream()
                 .map(SpellMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public SpellDTO getSpellById(Long id) {
-        return spellRepository.findById(id)
-                .map(SpellMapper::toDTO)
-                .orElse(null);
+    public Optional<SpellDTO> findById(Long id) {
+        return spellRepository.findById(id).map(SpellMapper::toDTO);
     }
 
     @Override
-    public void createSpell(SpellDTO spellDTO) {
+    public void save(SpellDTO spellDTO) {
         Spell spell = SpellMapper.toEntity(spellDTO);
         spellRepository.save(spell);
     }
 
     @Override
-    public void updateSpell(SpellDTO spellDTO) {
+    public void update(SpellDTO spellDTO) {
         Spell spell = SpellMapper.toEntity(spellDTO);
         spellRepository.update(spell);
     }
 
     @Override
-    public void deleteSpell(Long id) {
+    public void delete(Long id) {
         spellRepository.delete(id);
     }
 
     @Override
-    public List<SpellDTO> getSpellsByClass(String spellClass) {
-        return spellRepository.findByClass(Long.parseLong(spellClass)).stream()
-                .map(SpellMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<SpellDTO> getSpellsByCircle(String circle) {
-        return spellRepository.findByCircle(circle).stream()
-                .map(SpellMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<SpellDTO> getSpellsBySchool(String school) {
-        return spellRepository.findBySchool(school).stream()
+    public List<SpellDTO> findByClassAndCircle(String spellClass, String circle) {
+        return spellRepository.findByClassAndCircle(spellClass, circle).stream()
                 .map(SpellMapper::toDTO)
                 .collect(Collectors.toList());
     }
