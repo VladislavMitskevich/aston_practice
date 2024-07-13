@@ -1,8 +1,8 @@
 package org.examle.aston_practice.spellbook.repository.impl;
 
 import org.examle.aston_practice.spellbook.entity.Spell;
-import org.examle.aston_practice.spellbook.enums.Circle;
-import org.examle.aston_practice.spellbook.enums.School;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.enums.SpellSchool;
 import org.examle.aston_practice.spellbook.repository.SpellRepository;
 
 import java.sql.*;
@@ -11,30 +11,28 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of the Spell repository using JDBC.
+ * Implementation of SpellRepository using JDBC.
  */
 public class SpellRepositoryImpl implements SpellRepository {
-    private static final String URL = "jdbc:mysql://localhost:3306/spellbook";
-    private static final String USER = "root";
-    private static final String PASSWORD = "password";
 
-    static {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+    private final String url;
+    private final String user;
+    private final String password;
+
+    public SpellRepositoryImpl(String url, String user, String password) {
+        this.url = url;
+        this.user = user;
+        this.password = password;
     }
 
     @Override
     public List<Spell> findAll() {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = DriverManager.getConnection(url, user, password);
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery("SELECT * FROM spells")) {
             while (resultSet.next()) {
-                Spell spell = mapResultSetToSpell(resultSet);
-                spells.add(spell);
+                spells.add(mapResultSetToSpell(resultSet));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -44,13 +42,13 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public Optional<Spell> findById(Long id) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = DriverManager.getConnection(url, user, password);
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                Spell spell = mapResultSetToSpell(resultSet);
-                return Optional.of(spell);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(mapResultSetToSpell(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -59,35 +57,32 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public Spell save(Spell spell) {
-        String sql = "INSERT INTO spells (name, description, school, circle) VALUES (?, ?, ?, ?)";
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    public void save(Spell spell) {
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement(
+                     "INSERT INTO spells (name, description, school, circle, spell_class) VALUES (?, ?, ?, ?, ?)")) {
             statement.setString(1, spell.getName());
             statement.setString(2, spell.getDescription());
             statement.setString(3, spell.getSchool().name());
             statement.setString(4, spell.getCircle().name());
+            statement.setString(5, spell.getSpellClass());
             statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                spell.setId(generatedKeys.getLong(1));
-            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return spell;
     }
 
     @Override
     public void update(Spell spell) {
-        String sql = "UPDATE spells SET name = ?, description = ?, school = ?, circle = ? WHERE id = ?";
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement(
+                     "UPDATE spells SET name = ?, description = ?, school = ?, circle = ?, spell_class = ? WHERE id = ?")) {
             statement.setString(1, spell.getName());
             statement.setString(2, spell.getDescription());
             statement.setString(3, spell.getSchool().name());
             statement.setString(4, spell.getCircle().name());
-            statement.setLong(5, spell.getId());
+            statement.setString(5, spell.getSpellClass());
+            statement.setLong(6, spell.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -96,9 +91,8 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public void delete(Long id) {
-        String sql = "DELETE FROM spells WHERE id = ?";
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement("DELETE FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -107,15 +101,16 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public List<Spell> findByCircle(Circle circle) {
+    public List<Spell> findByClass(Long classId) {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE circle = ?")) {
-            statement.setString(1, circle.name());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Spell spell = mapResultSetToSpell(resultSet);
-                spells.add(spell);
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT s.* FROM spells s JOIN spell_class sc ON s.id = sc.spell_id WHERE sc.class_id = ?")) {
+            statement.setLong(1, classId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    spells.add(mapResultSetToSpell(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -124,33 +119,32 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public List<Spell> findByClass(Long classId) {
+    public List<Spell> findByCircle(String circle) {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT s.* FROM spells s JOIN spell_class sc ON s.id = sc.spell_id WHERE sc.class_id = ?")) {
-            statement.setLong(1, classId);
-        ResultSet resultSet = statement.executeQuery();
-        while (resultSet.next()) {
-            Spell spell = mapResultSetToSpell(resultSet);
-            spells.add(spell);
+        try (Connection connection = DriverManager.getConnection(url, user, password);
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE circle = ?")) {
+            statement.setString(1, circle);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    spells.add(mapResultSetToSpell(resultSet));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
         return spells;
-}
+    }
 
     @Override
-    public List<Spell> findBySchool(School school) {
+    public List<Spell> findBySchool(String school) {
         List<Spell> spells = new ArrayList<>();
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        try (Connection connection = DriverManager.getConnection(url, user, password);
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE school = ?")) {
-            statement.setString(1, school.name());
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Spell spell = mapResultSetToSpell(resultSet);
-                spells.add(spell);
+            statement.setString(1, school);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    spells.add(mapResultSetToSpell(resultSet));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -163,8 +157,9 @@ public class SpellRepositoryImpl implements SpellRepository {
         spell.setId(resultSet.getLong("id"));
         spell.setName(resultSet.getString("name"));
         spell.setDescription(resultSet.getString("description"));
-        spell.setSchool(School.valueOf(resultSet.getString("school")));
-        spell.setCircle(Circle.valueOf(resultSet.getString("circle")));
+        spell.setSchool(SpellSchool.valueOf(resultSet.getString("school")));
+        spell.setCircle(SpellCircle.valueOf(resultSet.getString("circle")));
+        spell.setSpellClass(resultSet.getString("spell_class"));
         return spell;
     }
 }

@@ -1,20 +1,18 @@
 package org.examle.aston_practice.spellbook.entity;
 
 import lombok.Data;
-import org.examle.aston_practice.spellbook.enums.Circle;
-import org.examle.aston_practice.spellbook.enums.School;
-
-import java.util.Set;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.enums.SpellSchool;
 
 /**
- * Entity class representing a spell.
+ * Entity representing a Spell.
  */
 @Data
 public class Spell {
     private Long id;
     private String name;
     private String description;
-    private School school; // School of magic the spell belongs to
-    private Circle circle; // Circle of the spell
-    private Set<Class> classes; // Classes that can cast this spell
+    private SpellSchool school; // School of magic
+    private SpellCircle circle; // Circle of the spell
+    private String spellClass; // Class of the spell in format "Class(Circle)"
 }

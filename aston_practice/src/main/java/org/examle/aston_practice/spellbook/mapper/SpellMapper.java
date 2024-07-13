@@ -2,48 +2,43 @@ package org.examle.aston_practice.spellbook.mapper;
 
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.entity.Spell;
-import org.examle.aston_practice.spellbook.entity.Class;
-
-import java.util.Set;
-import java.util.stream.Collectors;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.enums.SpellSchool;
 
 /**
- * Mapper for converting between Spell entity and SpellDTO.
+ * Mapper class for converting between Spell and SpellDTO.
  */
 public class SpellMapper {
 
     /**
-     * Converts Spell entity to SpellDTO.
+     * Converts a Spell entity to a SpellDTO.
      * @param spell the Spell entity
-     * @return the SpellDTO
+     * @return the corresponding SpellDTO
      */
-    public SpellDTO toDTO(Spell spell) {
-        SpellDTO spellDTO = new SpellDTO();
-        spellDTO.setId(spell.getId());
-        spellDTO.setName(spell.getName());
-        spellDTO.setDescription(spell.getDescription());
-        spellDTO.setSchool(spell.getSchool());
-        spellDTO.setCircle(spell.getCircle());
-        spellDTO.setClassCircles(spell.getClasses().stream()
-                .map(c -> c.getName() + "(" + spell.getCircle().name() + ")")
-                .collect(Collectors.toSet()));
-        return spellDTO;
+    public static SpellDTO toDTO(Spell spell) {
+        SpellDTO dto = new SpellDTO();
+        dto.setId(spell.getId());
+        dto.setName(spell.getName());
+        dto.setDescription(spell.getDescription());
+        dto.setSchool(spell.getSchool().name());
+        dto.setCircle(spell.getCircle().name());
+        dto.setSpellClass(spell.getSpellClass());
+        return dto;
     }
 
     /**
-     * Converts SpellDTO to Spell entity.
-     * @param spellDTO the SpellDTO
-     * @param classes the set of classes
-     * @return the Spell entity
+     * Converts a SpellDTO to a Spell entity.
+     * @param dto the SpellDTO
+     * @return the corresponding Spell entity
      */
-    public Spell toEntity(SpellDTO spellDTO, Set<Class> classes) {
+    public static Spell toEntity(SpellDTO dto) {
         Spell spell = new Spell();
-        spell.setId(spellDTO.getId());
-        spell.setName(spellDTO.getName());
-        spell.setDescription(spellDTO.getDescription());
-        spell.setSchool(spellDTO.getSchool());
-        spell.setCircle(spellDTO.getCircle());
-        spell.setClasses(classes);
+        spell.setId(dto.getId());
+        spell.setName(dto.getName());
+        spell.setDescription(dto.getDescription());
+        spell.setSchool(SpellSchool.valueOf(dto.getSchool()));
+        spell.setCircle(SpellCircle.valueOf(dto.getCircle()));
+        spell.setSpellClass(dto.getSpellClass());
         return spell;
     }
 }
