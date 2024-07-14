@@ -6,12 +6,25 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * Data Transfer Object for Character
+ * Data Transfer Object for Character.
+ * This class is used to transfer character data between different layers of the application.
  */
 @Data
 public class CharacterDTO {
+    /**
+     * Unique identifier for the character.
+     */
     private Long id;
+
+    /**
+     * Name of the character.
+     */
     private String name;
+
+    /**
+     * Map containing the spell limits for each caster class.
+     * The key is the caster class and the value is the maximum number of spells that can be cast.
+     */
     private Map<CasterClass, Integer> spellLimits;
 
     /**
