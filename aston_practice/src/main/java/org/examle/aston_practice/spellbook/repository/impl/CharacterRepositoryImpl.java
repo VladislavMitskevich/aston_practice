@@ -10,9 +10,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
- * Implementation of Character repository
+ * Implementation of Character repository.
+ * This class provides the implementation for the CRUD operations on Character entities.
  */
 public class CharacterRepositoryImpl implements CharacterRepository {
 
@@ -33,19 +35,19 @@ public class CharacterRepositoryImpl implements CharacterRepository {
     }
 
     @Override
-    public Character findById(Long id) {
-        Character character = null;
+    public Optional<Character> findById(Long id) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM characters WHERE id = ?")) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                character = mapResultSetToCharacter(resultSet);
+                Character character = mapResultSetToCharacter(resultSet);
+                return Optional.of(character);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return character;
+        return Optional.empty();
     }
 
     @Override
@@ -86,6 +88,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Maps a ResultSet to a Character entity.
+     * @param resultSet the ResultSet to map
+     * @return the mapped Character entity
+     * @throws SQLException if a database access error occurs
+     */
     private Character mapResultSetToCharacter(ResultSet resultSet) throws SQLException {
         Character character = new Character();
         character.setId(resultSet.getLong("id"));
@@ -94,6 +102,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return character;
     }
 
+    /**
+     * Converts a Map of spell limits to a String.
+     * @param spellLimits the Map of spell limits
+     * @return the String representation of the spell limits
+     */
     private String mapSpellLimitsToString(Map<CasterClass, Integer> spellLimits) {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<CasterClass, Integer> entry : spellLimits.entrySet()) {
@@ -105,6 +118,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return sb.toString();
     }
 
+    /**
+     * Converts a String representation of spell limits to a Map.
+     * @param spellLimits the String representation of spell limits
+     * @return the Map of spell limits
+     */
     private Map<CasterClass, Integer> mapStringToSpellLimits(String spellLimits) {
         Map<CasterClass, Integer> map = new HashMap<>();
         String[] pairs = spellLimits.split(",");

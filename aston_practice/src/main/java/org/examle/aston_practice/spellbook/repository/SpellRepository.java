@@ -6,46 +6,47 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Interface for spell repository
+ * Interface for spell repository.
+ * This interface defines the methods for CRUD operations on Spell entities.
  */
 public interface SpellRepository {
 
     /**
-     * Finds all spells
-     * @return list of spells
+     * Finds all spells from the database.
+     * @return list of all spells
      */
     List<Spell> findAll();
 
     /**
-     * Finds a spell by id
-     * @param id the spell id
-     * @return optional spell
+     * Finds a spell by its ID.
+     * @param id the ID of the spell to retrieve
+     * @return an Optional containing the spell if found, or an empty Optional if not found
      */
     Optional<Spell> findById(Long id);
 
     /**
-     * Saves a spell
+     * Saves a new spell to the database.
      * @param spell the spell to save
      */
     void save(Spell spell);
 
     /**
-     * Updates a spell
+     * Updates an existing spell in the database.
      * @param spell the spell to update
      */
     void update(Spell spell);
 
     /**
-     * Deletes a spell by id
-     * @param id the spell id
+     * Deletes a spell by its ID.
+     * @param id the ID of the spell to delete
      */
-    void delete(Long id);
+    void deleteById(Long id);
 
     /**
-     * Finds spells by class and circle
-     * @param spellClass the spell class
+     * Finds spells by caster class and circle.
+     * @param casterClass the caster class
      * @param circle the circle
-     * @return list of spells
+     * @return list of spells that match the specified caster class and circle
      */
-    List<Spell> findByClassAndCircle(String spellClass, String circle);
+    List<Spell> findByCasterClassAndCircle(String casterClass, int circle);
 }

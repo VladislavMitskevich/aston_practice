@@ -13,7 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Implementation of Spell repository
+ * Implementation of Spell repository.
+ * This class provides the implementation for the CRUD operations on Spell entities.
  */
 public class SpellRepositoryImpl implements SpellRepository {
 
@@ -35,18 +36,18 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public Optional<Spell> findById(Long id) {
-        Spell spell = null;
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                spell = mapResultSetToSpell(resultSet);
+                Spell spell = mapResultSetToSpell(resultSet);
+                return Optional.of(spell);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return Optional.ofNullable(spell);
+        return Optional.empty();
     }
 
     @Override
@@ -81,7 +82,7 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement("DELETE FROM spells WHERE id = ?")) {
             statement.setLong(1, id);
@@ -92,13 +93,13 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public List<Spell> findByClassAndCircle(String spellClass, String circle) {
+    public List<Spell> findByCasterClassAndCircle(String casterClass, int circle) {
         List<Spell> spells = new ArrayList<>();
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "SELECT * FROM spells WHERE caster_class = ? AND circle = ?")) {
-            statement.setString(1, spellClass);
-            statement.setString(2, circle);
+            statement.setString(1, casterClass);
+            statement.setString(2, SpellCircle.values()[circle - 1].name());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Spell spell = mapResultSetToSpell(resultSet);
@@ -110,6 +111,12 @@ public class SpellRepositoryImpl implements SpellRepository {
         return spells;
     }
 
+    /**
+     * Maps a ResultSet to a Spell entity.
+     * @param resultSet the ResultSet to map
+     * @return the mapped Spell entity
+     * @throws SQLException if a database access error occurs
+     */
     private Spell mapResultSetToSpell(ResultSet resultSet) throws SQLException {
         Spell spell = new Spell();
         spell.setId(resultSet.getLong("id"));
