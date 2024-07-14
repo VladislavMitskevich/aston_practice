@@ -11,49 +11,54 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of SpellService
+ * Implementation of SpellService interface.
  */
 public class SpellServiceImpl implements SpellService {
 
     private final SpellRepository spellRepository;
+    private final SpellMapper spellMapper;
 
-    public SpellServiceImpl(SpellRepository spellRepository) {
+    public SpellServiceImpl(SpellRepository spellRepository, SpellMapper spellMapper) {
         this.spellRepository = spellRepository;
+        this.spellMapper = spellMapper;
     }
 
     @Override
     public List<SpellDTO> findAll() {
-        return spellRepository.findAll().stream()
-                .map(SpellMapper::toDTO)
+        List<Spell> spells = spellRepository.findAll();
+        return spells.stream()
+                .map(spellMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Optional<SpellDTO> findById(Long id) {
-        return spellRepository.findById(id).map(SpellMapper::toDTO);
+    public SpellDTO findById(Long id) {
+        Optional<Spell> spell = spellRepository.findById(id);
+        return spell.map(spellMapper::toDto).orElse(null);
     }
 
     @Override
     public void save(SpellDTO spellDTO) {
-        Spell spell = SpellMapper.toEntity(spellDTO);
+        Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.save(spell);
     }
 
     @Override
     public void update(SpellDTO spellDTO) {
-        Spell spell = SpellMapper.toEntity(spellDTO);
+        Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.update(spell);
     }
 
     @Override
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         spellRepository.delete(id);
     }
 
     @Override
     public List<SpellDTO> findByClassAndCircle(String spellClass, String circle) {
-        return spellRepository.findByClassAndCircle(spellClass, circle).stream()
-                .map(SpellMapper::toDTO)
+        List<Spell> spells = spellRepository.findByClassAndCircle(spellClass, circle);
+        return spells.stream()
+                .map(spellMapper::toDto)
                 .collect(Collectors.toList());
     }
 }

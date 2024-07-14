@@ -2,43 +2,28 @@ package org.examle.aston_practice.spellbook.mapper;
 
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.entity.Spell;
-import org.examle.aston_practice.spellbook.enums.SpellCircle;
-import org.examle.aston_practice.spellbook.enums.SpellSchool;
 
 /**
- * Mapper class for converting between Spell and SpellDTO.
+ * Mapper for converting Spell entities to DTOs and vice versa
  */
 public class SpellMapper {
-
-    /**
-     * Converts a Spell entity to a SpellDTO.
-     * @param spell the Spell entity
-     * @return the corresponding SpellDTO
-     */
-    public static SpellDTO toDTO(Spell spell) {
+    public SpellDTO toDto(Spell spell) {
         SpellDTO dto = new SpellDTO();
         dto.setId(spell.getId());
         dto.setName(spell.getName());
-        dto.setDescription(spell.getDescription());
-        dto.setSchool(spell.getSchool().name());
-        dto.setCircle(spell.getCircle().name());
-        dto.setSpellClass(spell.getSpellClass());
+        dto.setSchool(spell.getSchool());
+        dto.setCircle(spell.getCircle());
+        dto.setCasterClass(spell.getCasterClass());
         return dto;
     }
 
-    /**
-     * Converts a SpellDTO to a Spell entity.
-     * @param dto the SpellDTO
-     * @return the corresponding Spell entity
-     */
-    public static Spell toEntity(SpellDTO dto) {
+    public Spell toEntity(SpellDTO dto) {
         Spell spell = new Spell();
         spell.setId(dto.getId());
         spell.setName(dto.getName());
-        spell.setDescription(dto.getDescription());
-        spell.setSchool(SpellSchool.valueOf(dto.getSchool()));
-        spell.setCircle(SpellCircle.valueOf(dto.getCircle()));
-        spell.setSpellClass(dto.getSpellClass());
+        spell.setSchool(dto.getSchool());
+        spell.setCircle(dto.getCircle());
+        spell.setCasterClass(dto.getCasterClass());
         return spell;
     }
 }
