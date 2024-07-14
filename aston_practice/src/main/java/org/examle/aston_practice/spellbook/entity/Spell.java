@@ -6,14 +6,34 @@ import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import lombok.Data;
 
 /**
- * Entity representing a Spell
+ * Entity representing a Spell.
+ * This class is used to represent a spell in the database.
  */
 @Data
 public class Spell {
+    /**
+     * Unique identifier for the spell.
+     */
     private Long id;
+
+    /**
+     * Name of the spell.
+     */
     private String name;
+
+    /**
+     * School of magic to which the spell belongs.
+     */
     private SchoolOfMagic school;
+
+    /**
+     * Circle of the spell.
+     */
     private SpellCircle circle;
+
+    /**
+     * Caster class that can cast the spell.
+     */
     private CasterClass casterClass;
 
     /**

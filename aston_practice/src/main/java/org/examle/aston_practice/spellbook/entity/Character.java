@@ -6,12 +6,25 @@ import lombok.Data;
 import java.util.Map;
 
 /**
- * Entity representing a Character
+ * Entity representing a Character.
+ * This class is used to represent a character in the database.
  */
 @Data
 public class Character {
+    /**
+     * Unique identifier for the character.
+     */
     private Long id;
+
+    /**
+     * Name of the character.
+     */
     private String name;
+
+    /**
+     * Map containing the spell limits for each caster class.
+     * The key is the caster class and the value is the maximum number of spells that can be cast.
+     */
     private Map<CasterClass, Integer> spellLimits;
 
     /**
