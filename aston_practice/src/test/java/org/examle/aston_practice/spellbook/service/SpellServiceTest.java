@@ -1,0 +1,89 @@
+package org.examle.aston_practice.spellbook.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import org.examle.aston_practice.spellbook.dto.SpellDTO;
+import org.examle.aston_practice.spellbook.entity.Spell;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.mapper.SpellMapper;
+import org.examle.aston_practice.spellbook.repository.SpellRepository;
+import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class SpellServiceTest {
+
+    @Mock
+    private SpellRepository spellRepository;
+
+    @Mock
+    private SpellMapper spellMapper;
+
+    @InjectMocks
+    private SpellServiceImpl spellService;
+
+    private SpellDTO spellDTO;
+    private Spell spell;
+
+    @BeforeEach
+    public void setUp() {
+        spellDTO = new SpellDTO();
+        spellDTO.setId(1L);
+        spellDTO.setName("Fireball");
+        spellDTO.setSchool(SchoolOfMagic.EVOCATION);
+        spellDTO.setCircle(SpellCircle.THIRD);
+        spellDTO.setDescription("A bright streak flashes from your pointing finger...");
+
+        spell = new Spell();
+        spell.setId(1L);
+        spell.setName("Fireball");
+        spell.setSchool(SchoolOfMagic.EVOCATION);
+        spell.setCircle(SpellCircle.THIRD);
+        spell.setDescription("A bright streak flashes from your pointing finger...");
+    }
+
+    @Test
+    public void testCreateSpell() {
+        when(spellMapper.toEntity(spellDTO)).thenReturn(spell);
+        doNothing().when(spellRepository).save(spell);
+
+        spellService.createSpell(spellDTO);
+
+        verify(spellRepository, times(1)).save(spell);
+    }
+
+    @Test
+    public void testGetSpellById() {
+        when(spellRepository.findById(1L)).thenReturn(Optional.of(spell));
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
+
+        Optional<SpellDTO> result = spellService.getSpellById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(spellDTO, result.get());
+    }
+
+    @Test
+    public void testGetSpellsByCasterClassAndCircle() {
+        List<Spell> spells = Arrays.asList(spell);
+        when(spellRepository.findByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.THIRD)).thenReturn(spells);
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
+
+        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.THIRD);
+
+        assertEquals(1, result.size());
+        assertEquals(spellDTO, result.get(0));
+    }
+}
