@@ -1,6 +1,7 @@
 package org.examle.aston_practice.spellbook.service;
 
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,4 +40,18 @@ public interface CharacterService {
      * @param id the ID of the character to delete
      */
     void deleteCharacter(Long id);
+
+    /**
+     * Retrieves characters by caster class.
+     * @param casterClass the caster class
+     * @return a list of characters as DTOs that match the specified caster class
+     */
+    List<CharacterDTO> getCharactersByCasterClass(CasterClass casterClass);
+
+    /**
+     * Adds a spell to a character's spell list.
+     * @param characterId the ID of the character
+     * @param spellId the ID of the spell
+     */
+    void addSpellToCharacter(Long characterId, Long spellId);
 }

@@ -5,6 +5,8 @@ import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
 import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.SpellService;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +57,7 @@ public class SpellServiceImpl implements SpellService {
     }
 
     @Override
-    public List<SpellDTO> getSpellsByCasterClassAndCircle(String casterClass, int circle) {
+    public List<SpellDTO> getSpellsByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle) {
         return spellRepository.findByCasterClassAndCircle(casterClass, circle)
                 .stream()
                 .map(spellMapper::toDto)

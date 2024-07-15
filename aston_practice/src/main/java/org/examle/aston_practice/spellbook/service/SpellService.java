@@ -1,6 +1,8 @@
 package org.examle.aston_practice.spellbook.service;
 
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
 import java.util.List;
 import java.util.Optional;
@@ -46,5 +48,5 @@ public interface SpellService {
      * @param circle the circle
      * @return a list of spells as DTOs that match the specified caster class and circle
      */
-    List<SpellDTO> getSpellsByCasterClassAndCircle(String casterClass, int circle);
+    List<SpellDTO> getSpellsByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle);
 }

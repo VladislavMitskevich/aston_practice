@@ -5,6 +5,7 @@ import org.examle.aston_practice.spellbook.entity.Character;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.repository.CharacterRepository;
 import org.examle.aston_practice.spellbook.service.CharacterService;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,5 +53,18 @@ public class CharacterServiceImpl implements CharacterService {
     @Override
     public void deleteCharacter(Long id) {
         characterRepository.deleteById(id);
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersByCasterClass(CasterClass casterClass) {
+        return characterRepository.findByCasterClass(casterClass)
+                .stream()
+                .map(characterMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void addSpellToCharacter(Long characterId, Long spellId) {
+        characterRepository.addSpellToCharacter(characterId, spellId);
     }
 }
