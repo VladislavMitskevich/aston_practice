@@ -2,7 +2,9 @@ package org.examle.aston_practice.spellbook.entity;
 
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import lombok.Data;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -22,10 +24,19 @@ public class Character {
     private String name;
 
     /**
-     * Map containing the spell limits for each caster class.
-     * The key is the caster class and the value is the maximum number of spells that can be cast.
+     * Caster class of the character.
      */
-    private Map<CasterClass, Integer> spellLimits;
+    private CasterClass casterClass;
+
+    /**
+     * Level of the character.
+     */
+    private int level;
+
+    /**
+     * Map of spells available to the character by circle.
+     */
+    private Map<SpellCircle, List<Spell>> spellsByCircle;
 
     /**
      * Returns a string representation of the character.
@@ -36,7 +47,9 @@ public class Character {
         return "Character{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", spellLimits=" + spellLimits +
+                ", casterClass=" + casterClass +
+                ", level=" + level +
+                ", spellsByCircle=" + spellsByCircle +
                 '}';
     }
 }
