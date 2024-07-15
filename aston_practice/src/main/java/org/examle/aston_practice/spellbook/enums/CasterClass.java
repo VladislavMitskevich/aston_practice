@@ -7,5 +7,6 @@ public enum CasterClass {
     WIZARD,
     CLERIC,
     DRUID,
-    SORCERER
+    SORCERER,
+    MAGE
 }
