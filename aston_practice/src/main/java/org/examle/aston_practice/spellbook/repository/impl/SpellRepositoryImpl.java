@@ -9,13 +9,11 @@ import org.examle.aston_practice.spellbook.util.DatabaseUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-/**
- * Implementation of Spell repository.
- * This class provides the implementation for the CRUD operations on Spell entities.
- */
 public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
@@ -54,14 +52,22 @@ public class SpellRepositoryImpl implements SpellRepository {
     public void save(Spell spell) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO spells (name, school, circle, caster_class) VALUES (?, ?, ?, ?)")) {
+                     "INSERT INTO spells (name, school, circle, description) VALUES (?, ?, ?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, spell.getName());
             statement.setString(2, spell.getSchool().name());
             statement.setString(3, spell.getCircle().name());
-            statement.setString(4, spell.getCasterClass().name());
+            statement.setString(4, spell.getDescription());
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Creating spell failed, no rows affected.");
+            }
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    spell.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating spell failed, no ID obtained.");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -72,11 +78,11 @@ public class SpellRepositoryImpl implements SpellRepository {
     public void update(Spell spell) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "UPDATE spells SET name = ?, school = ?, circle = ?, caster_class = ? WHERE id = ?")) {
+                     "UPDATE spells SET name = ?, school = ?, circle = ?, description = ? WHERE id = ?")) {
             statement.setString(1, spell.getName());
             statement.setString(2, spell.getSchool().name());
             statement.setString(3, spell.getCircle().name());
-            statement.setString(4, spell.getCasterClass().name());
+            statement.setString(4, spell.getDescription());
             statement.setLong(5, spell.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
@@ -96,13 +102,13 @@ public class SpellRepositoryImpl implements SpellRepository {
     }
 
     @Override
-    public List<Spell> findByCasterClassAndCircle(String casterClass, int circle) {
+    public List<Spell> findByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle) {
         List<Spell> spells = new ArrayList<>();
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT * FROM spells WHERE caster_class = ? AND circle = ?")) {
-            statement.setString(1, casterClass);
-            statement.setString(2, SpellCircle.values()[circle - 1].name());
+                     "SELECT s.* FROM spells s JOIN spell_caster_classes sc ON s.id = sc.spell_id WHERE sc.caster_class = ? AND s.circle = ?")) {
+            statement.setString(1, casterClass.name());
+            statement.setString(2, circle.name());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Spell spell = mapResultSetToSpell(resultSet);
@@ -126,7 +132,29 @@ public class SpellRepositoryImpl implements SpellRepository {
         spell.setName(resultSet.getString("name"));
         spell.setSchool(SchoolOfMagic.valueOf(resultSet.getString("school")));
         spell.setCircle(SpellCircle.valueOf(resultSet.getString("circle")));
-        spell.setCasterClass(CasterClass.valueOf(resultSet.getString("caster_class")));
+        spell.setDescription(resultSet.getString("description"));
+        spell.setCasterClasses(getCasterClassesForSpell(spell.getId()));
         return spell;
+    }
+
+    /**
+     * Retrieves the caster classes for a given spell ID.
+     * @param spellId the ID of the spell
+     * @return a set of caster classes that can cast the spell
+     */
+    private Set<CasterClass> getCasterClassesForSpell(Long spellId) {
+        Set<CasterClass> casterClasses = new HashSet<>();
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT caster_class FROM spell_caster_classes WHERE spell_id = ?")) {
+            statement.setLong(1, spellId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                casterClasses.add(CasterClass.valueOf(resultSet.getString("caster_class")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return casterClasses;
     }
 }

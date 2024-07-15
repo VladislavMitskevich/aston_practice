@@ -1,6 +1,8 @@
 package org.examle.aston_practice.spellbook.repository;
 
 import org.examle.aston_practice.spellbook.entity.Spell;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,5 +50,5 @@ public interface SpellRepository {
      * @param circle the circle
      * @return list of spells that match the specified caster class and circle
      */
-    List<Spell> findByCasterClassAndCircle(String casterClass, int circle);
+    List<Spell> findByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle);
 }

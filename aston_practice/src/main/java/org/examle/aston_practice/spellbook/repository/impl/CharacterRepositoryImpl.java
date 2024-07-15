@@ -54,10 +54,22 @@ public class CharacterRepositoryImpl implements CharacterRepository {
     public void save(Character character) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO characters (name, spell_limits) VALUES (?, ?)")) {
+                     "INSERT INTO characters (name, caster_class, level) VALUES (?, ?, ?)",
+                     Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, character.getName());
-            statement.setString(2, mapSpellLimitsToString(character.getSpellLimits()));
-            statement.executeUpdate();
+            statement.setString(2, character.getCasterClass().name());
+            statement.setInt(3, character.getLevel());
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating character failed, no rows affected.");
+            }
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    character.setId(generatedKeys.getLong(1));
+                } else {
+                    throw new SQLException("Creating character failed, no ID obtained.");
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -67,10 +79,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
     public void update(Character character) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "UPDATE characters SET name = ?, spell_limits = ? WHERE id = ?")) {
+                     "UPDATE characters SET name = ?, caster_class = ?, level = ? WHERE id = ?")) {
             statement.setString(1, character.getName());
-            statement.setString(2, mapSpellLimitsToString(character.getSpellLimits()));
-            statement.setLong(3, character.getId());
+            statement.setString(2, character.getCasterClass().name());
+            statement.setInt(3, character.getLevel());
+            statement.setLong(4, character.getId());
             statement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,6 +101,36 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    @Override
+    public List<Character> findByCasterClass(CasterClass casterClass) {
+        List<Character> characters = new ArrayList<>();
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM characters WHERE caster_class = ?")) {
+            statement.setString(1, casterClass.name());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Character character = mapResultSetToCharacter(resultSet);
+                characters.add(character);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return characters;
+    }
+
+    @Override
+    public void addSpellToCharacter(Long characterId, Long spellId) {
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "INSERT INTO character_spells (character_id, spell_id) VALUES (?, ?)")) {
+            statement.setLong(1, characterId);
+            statement.setLong(2, spellId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Maps a ResultSet to a Character entity.
      * @param resultSet the ResultSet to map
@@ -98,38 +141,8 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         Character character = new Character();
         character.setId(resultSet.getLong("id"));
         character.setName(resultSet.getString("name"));
-        character.setSpellLimits(mapStringToSpellLimits(resultSet.getString("spell_limits")));
+        character.setCasterClass(CasterClass.valueOf(resultSet.getString("caster_class")));
+        character.setLevel(resultSet.getInt("level"));
         return character;
-    }
-
-    /**
-     * Converts a Map of spell limits to a String.
-     * @param spellLimits the Map of spell limits
-     * @return the String representation of the spell limits
-     */
-    private String mapSpellLimitsToString(Map<CasterClass, Integer> spellLimits) {
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<CasterClass, Integer> entry : spellLimits.entrySet()) {
-            sb.append(entry.getKey().name()).append(":").append(entry.getValue()).append(",");
-        }
-        if (sb.length() > 0) {
-            sb.setLength(sb.length() - 1); // Remove the last comma
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Converts a String representation of spell limits to a Map.
-     * @param spellLimits the String representation of spell limits
-     * @return the Map of spell limits
-     */
-    private Map<CasterClass, Integer> mapStringToSpellLimits(String spellLimits) {
-        Map<CasterClass, Integer> map = new HashMap<>();
-        String[] pairs = spellLimits.split(",");
-        for (String pair : pairs) {
-            String[] keyValue = pair.split(":");
-            map.put(CasterClass.valueOf(keyValue[0]), Integer.parseInt(keyValue[1]));
-        }
-        return map;
     }
 }

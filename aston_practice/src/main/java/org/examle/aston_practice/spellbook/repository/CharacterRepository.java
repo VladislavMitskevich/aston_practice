@@ -1,6 +1,8 @@
 package org.examle.aston_practice.spellbook.repository;
 
 import org.examle.aston_practice.spellbook.entity.Character;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,4 +42,18 @@ public interface CharacterRepository {
      * @param id the ID of the character to delete
      */
     void deleteById(Long id);
+
+    /**
+     * Finds characters by caster class.
+     * @param casterClass the caster class
+     * @return list of characters that match the specified caster class
+     */
+    List<Character> findByCasterClass(CasterClass casterClass);
+
+    /**
+     * Adds a spell to a character's spell list.
+     * @param characterId the ID of the character
+     * @param spellId the ID of the spell
+     */
+    void addSpellToCharacter(Long characterId, Long spellId);
 }
