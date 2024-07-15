@@ -24,40 +24,40 @@ public class SpellServiceImpl implements SpellService {
     }
 
     @Override
-    public List<SpellDTO> findAll() {
-        List<Spell> spells = spellRepository.findAll();
-        return spells.stream()
+    public List<SpellDTO> getAllSpells() {
+        return spellRepository.findAll()
+                .stream()
                 .map(spellMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public SpellDTO findById(Long id) {
-        Optional<Spell> spell = spellRepository.findById(id);
-        return spell.map(spellMapper::toDto).orElse(null);
+    public Optional<SpellDTO> getSpellById(Long id) {
+        return spellRepository.findById(id)
+                .map(spellMapper::toDto);
     }
 
     @Override
-    public void save(SpellDTO spellDTO) {
+    public void createSpell(SpellDTO spellDTO) {
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.save(spell);
     }
 
     @Override
-    public void update(SpellDTO spellDTO) {
+    public void updateSpell(SpellDTO spellDTO) {
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.update(spell);
     }
 
     @Override
-    public void deleteById(Long id) {
-        spellRepository.delete(id);
+    public void deleteSpell(Long id) {
+        spellRepository.deleteById(id);
     }
 
     @Override
-    public List<SpellDTO> findByClassAndCircle(String spellClass, String circle) {
-        List<Spell> spells = spellRepository.findByClassAndCircle(spellClass, circle);
-        return spells.stream()
+    public List<SpellDTO> getSpellsByCasterClassAndCircle(String casterClass, int circle) {
+        return spellRepository.findByCasterClassAndCircle(casterClass, circle)
+                .stream()
                 .map(spellMapper::toDto)
                 .collect(Collectors.toList());
     }

@@ -3,6 +3,9 @@ package org.examle.aston_practice.spellbook.servlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.service.CharacterService;
+import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
+import org.examle.aston_practice.spellbook.repository.impl.CharacterRepositoryImpl;
+import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,82 +14,73 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Servlet for handling Character related HTTP requests.
+ * Servlet for handling character-related requests.
  */
-@WebServlet("/characters/*")
+@WebServlet("/characters")
 public class CharacterServlet extends HttpServlet {
 
-    private final CharacterService characterService;
-    private final ObjectMapper objectMapper;
+    private CharacterService characterService;
+    private ObjectMapper objectMapper;
 
-    public CharacterServlet(CharacterService characterService) {
-        this.characterService = characterService;
-        this.objectMapper = new ObjectMapper();
+    @Override
+    public void init() throws ServletException {
+        characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), new CharacterMapper());
+        objectMapper = new ObjectMapper();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            List<CharacterDTO> characters = characterService.findAll();
-            resp.setContentType("application/json");
-            resp.getWriter().write(objectMapper.writeValueAsString(characters));
-        } else {
+        String idParam = req.getParameter("id");
+        if (idParam != null) {
             try {
-                Long id = Long.parseLong(pathInfo.substring(1));
-                CharacterDTO character = characterService.findById(id);
-                if (character != null) {
+                Long id = Long.valueOf(idParam);
+                Optional<CharacterDTO> character = characterService.getCharacterById(id);
+                if (character.isPresent()) {
                     resp.setContentType("application/json");
-                    resp.getWriter().write(objectMapper.writeValueAsString(character));
+                    resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
                 } else {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
             } catch (NumberFormatException e) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
+        } else {
+            List<CharacterDTO> characters = characterService.getAllCharacters();
+            resp.setContentType("application/json");
+            resp.getWriter().write(objectMapper.writeValueAsString(characters));
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-        characterService.save(characterDTO);
+        characterService.createCharacter(characterDTO);
         resp.setStatus(HttpServletResponse.SC_CREATED);
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        try {
-            Long id = Long.parseLong(pathInfo.substring(1));
-            CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-            characterDTO.setId(id);
-            characterService.update(characterDTO);
-            resp.setStatus(HttpServletResponse.SC_OK);
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-        }
+        CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
+        characterService.updateCharacter(characterDTO);
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String pathInfo = req.getPathInfo();
-        if (pathInfo == null || pathInfo.equals("/")) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
-        try {
-            Long id = Long.parseLong(pathInfo.substring(1));
-            characterService.deleteById(id);
-            resp.setStatus(HttpServletResponse.SC_OK);
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        String idParam = req.getParameter("id");
+        if (idParam != null) {
+            try {
+                Long id = Long.valueOf(idParam);
+                characterService.deleteCharacter(id);
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            } catch (NumberFormatException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } else {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
     }
 }

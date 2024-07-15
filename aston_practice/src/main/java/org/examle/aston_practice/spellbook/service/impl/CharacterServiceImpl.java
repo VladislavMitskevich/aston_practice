@@ -7,6 +7,7 @@ import org.examle.aston_practice.spellbook.repository.CharacterRepository;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -23,33 +24,33 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public List<CharacterDTO> findAll() {
-        List<Character> characters = characterRepository.findAll();
-        return characters.stream()
+    public List<CharacterDTO> getAllCharacters() {
+        return characterRepository.findAll()
+                .stream()
                 .map(characterMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public CharacterDTO findById(Long id) {
-        Character character = characterRepository.findById(id);
-        return characterMapper.toDto(character);
+    public Optional<CharacterDTO> getCharacterById(Long id) {
+        return characterRepository.findById(id)
+                .map(characterMapper::toDto);
     }
 
     @Override
-    public void save(CharacterDTO characterDTO) {
+    public void createCharacter(CharacterDTO characterDTO) {
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.save(character);
     }
 
     @Override
-    public void update(CharacterDTO characterDTO) {
+    public void updateCharacter(CharacterDTO characterDTO) {
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.update(character);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public void deleteCharacter(Long id) {
         characterRepository.deleteById(id);
     }
 }

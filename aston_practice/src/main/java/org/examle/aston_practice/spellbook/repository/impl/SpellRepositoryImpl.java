@@ -59,7 +59,10 @@ public class SpellRepositoryImpl implements SpellRepository {
             statement.setString(2, spell.getSchool().name());
             statement.setString(3, spell.getCircle().name());
             statement.setString(4, spell.getCasterClass().name());
-            statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Creating spell failed, no rows affected.");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
