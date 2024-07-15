@@ -5,6 +5,8 @@ import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import lombok.Data;
 
+import java.util.Set;
+
 /**
  * Data Transfer Object for Spell.
  * This class is used to transfer spell data between different layers of the application.
@@ -32,9 +34,14 @@ public class SpellDTO {
     private SpellCircle circle;
 
     /**
-     * Caster class that can cast the spell.
+     * Set of caster classes that can cast the spell.
      */
-    private CasterClass casterClass;
+    private Set<CasterClass> casterClasses;
+
+    /**
+     * Description of the spell.
+     */
+    private String description;
 
     /**
      * Returns a string representation of the spell.
@@ -47,7 +54,8 @@ public class SpellDTO {
                 ", name='" + name + '\'' +
                 ", school=" + school +
                 ", circle=" + circle +
-                ", casterClass=" + casterClass +
+                ", casterClasses=" + casterClasses +
+                ", description='" + description + '\'' +
                 '}';
     }
 }
