@@ -2,6 +2,8 @@ package org.examle.aston_practice.spellbook.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import org.examle.aston_practice.spellbook.service.SpellService;
 import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.SpellRepositoryImpl;
@@ -34,6 +36,9 @@ public class SpellServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idParam = req.getParameter("id");
+        String casterClassParam = req.getParameter("casterClass");
+        String circleParam = req.getParameter("circle");
+
         if (idParam != null) {
             try {
                 Long id = Long.valueOf(idParam);
@@ -45,6 +50,16 @@ public class SpellServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
             } catch (NumberFormatException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } else if (casterClassParam != null && circleParam != null) {
+            try {
+                CasterClass casterClass = CasterClass.valueOf(casterClassParam);
+                SpellCircle circle = SpellCircle.valueOf(circleParam);
+                List<SpellDTO> spells = spellService.getSpellsByCasterClassAndCircle(casterClass, circle);
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(spells));
+            } catch (IllegalArgumentException e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
         } else {

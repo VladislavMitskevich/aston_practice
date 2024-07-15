@@ -2,10 +2,12 @@ package org.examle.aston_practice.spellbook.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
+import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.CharacterRepositoryImpl;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
+import org.examle.aston_practice.spellbook.mapper.SpellMapper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,13 +29,17 @@ public class CharacterServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), new CharacterMapper());
+        SpellMapper spellMapper = new SpellMapper();
+        CharacterMapper characterMapper = new CharacterMapper(spellMapper);
+        characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), characterMapper);
         objectMapper = new ObjectMapper();
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idParam = req.getParameter("id");
+        String casterClassParam = req.getParameter("casterClass");
+
         if (idParam != null) {
             try {
                 Long id = Long.valueOf(idParam);
@@ -45,6 +51,15 @@ public class CharacterServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
             } catch (NumberFormatException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } else if (casterClassParam != null) {
+            try {
+                CasterClass casterClass = CasterClass.valueOf(casterClassParam);
+                List<CharacterDTO> characters = characterService.getCharactersByCasterClass(casterClass);
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(characters));
+            } catch (IllegalArgumentException e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
         } else {
@@ -63,9 +78,23 @@ public class CharacterServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-        characterService.updateCharacter(characterDTO);
-        resp.setStatus(HttpServletResponse.SC_OK);
+        String characterIdParam = req.getParameter("characterId");
+        String spellIdParam = req.getParameter("spellId");
+
+        if (characterIdParam != null && spellIdParam != null) {
+            try {
+                Long characterId = Long.valueOf(characterIdParam);
+                Long spellId = Long.valueOf(spellIdParam);
+                characterService.addSpellToCharacter(characterId, spellId);
+                resp.setStatus(HttpServletResponse.SC_OK);
+            } catch (NumberFormatException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } else {
+            CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
+            characterService.updateCharacter(characterDTO);
+            resp.setStatus(HttpServletResponse.SC_OK);
+        }
     }
 
     @Override
