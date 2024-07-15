@@ -19,7 +19,8 @@ public class SpellMapper {
         dto.setName(spell.getName());
         dto.setSchool(spell.getSchool());
         dto.setCircle(spell.getCircle());
-        dto.setCasterClass(spell.getCasterClass());
+        dto.setCasterClasses(spell.getCasterClasses());
+        dto.setDescription(spell.getDescription());
         return dto;
     }
 
@@ -34,7 +35,8 @@ public class SpellMapper {
         spell.setName(dto.getName());
         spell.setSchool(dto.getSchool());
         spell.setCircle(dto.getCircle());
-        spell.setCasterClass(dto.getCasterClass());
+        spell.setCasterClasses(dto.getCasterClasses());
+        spell.setDescription(dto.getDescription());
         return spell;
     }
 }
