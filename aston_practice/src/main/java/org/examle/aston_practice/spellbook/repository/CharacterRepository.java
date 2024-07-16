@@ -26,6 +26,13 @@ public interface CharacterRepository {
     Optional<Character> findById(Long id);
 
     /**
+     * Retrieves a character by its name.
+     * @param name the name of the character to retrieve
+     * @return an Optional containing the character if found, or an empty Optional if not found
+     */
+    Optional<Character> findByName(String name);
+
+    /**
      * Saves a new character to the database.
      * @param character the character to save
      */
@@ -56,4 +63,11 @@ public interface CharacterRepository {
      * @param spellId the ID of the spell
      */
     void addSpellToCharacter(Long characterId, Long spellId);
+
+    /**
+     * Finds all characters who have a specific spell.
+     * @param spellName the name of the spell
+     * @return list of characters that have the specified spell
+     */
+    List<Character> findBySpellName(String spellName);
 }
