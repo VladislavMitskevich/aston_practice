@@ -91,4 +91,59 @@ public class CharacterServiceTest {
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
     }
+
+    @Test
+    public void testUpdateCharacter() {
+        when(characterMapper.toEntity(characterDTO)).thenReturn(character);
+        doNothing().when(characterRepository).update(character);
+
+        characterService.updateCharacter(characterDTO);
+
+        verify(characterRepository, times(1)).update(character);
+    }
+
+    @Test
+    public void testDeleteCharacter() {
+        doNothing().when(characterRepository).deleteById(1L);
+
+        characterService.deleteCharacter(1L);
+
+        verify(characterRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    public void testGetAllCharacters() {
+        List<Character> characters = Arrays.asList(character);
+        when(characterRepository.findAll()).thenReturn(characters);
+        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+
+        List<CharacterDTO> result = characterService.getAllCharacters();
+
+        assertEquals(1, result.size());
+        assertEquals(characterDTO, result.get(0));
+    }
+
+    @Test
+    public void testGetCharacterByName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+
+        Optional<CharacterDTO> result = characterService.getCharacterByName("Gandalf");
+
+        assertTrue(result.isPresent());
+        assertEquals(characterDTO, result.get());
+    }
+
+    @Test
+    public void testGetCharactersBySpellName() {
+        List<Character> characters = Arrays.asList(character);
+        when(characterRepository.findBySpellName("Fireball")).thenReturn(characters);
+        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+
+        List<CharacterDTO> result = characterService.getCharactersBySpellName("Fireball");
+
+        assertEquals(1, result.size());
+        assertEquals(characterDTO, result.get(0));
+    }
+
 }
