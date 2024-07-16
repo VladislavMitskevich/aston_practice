@@ -39,6 +39,12 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
+    public Optional<CharacterDTO> getCharacterByName(String name) {
+        return characterRepository.findByName(name)
+                .map(characterMapper::toDto);
+    }
+
+    @Override
     public void createCharacter(CharacterDTO characterDTO) {
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.save(character);
@@ -66,5 +72,13 @@ public class CharacterServiceImpl implements CharacterService {
     @Override
     public void addSpellToCharacter(Long characterId, Long spellId) {
         characterRepository.addSpellToCharacter(characterId, spellId);
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersBySpellName(String spellName) {
+        return characterRepository.findBySpellName(spellName)
+                .stream()
+                .map(characterMapper::toDto)
+                .collect(Collectors.toList());
     }
 }
