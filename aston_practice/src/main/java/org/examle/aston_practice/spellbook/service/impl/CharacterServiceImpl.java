@@ -81,4 +81,9 @@ public class CharacterServiceImpl implements CharacterService {
                 .map(characterMapper::toDto)
                 .collect(Collectors.toList());
     }
+    @Override
+    public Optional<CharacterDTO> getCharacterSpellsByName(String name) {
+        return characterRepository.findByName(name)
+                .map(characterMapper::toDto);
+    }
 }

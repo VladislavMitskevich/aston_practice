@@ -68,4 +68,11 @@ public interface CharacterService {
      * @return a list of characters as DTOs that have the specified spell
      */
     List<CharacterDTO> getCharactersBySpellName(String spellName);
+
+    /**
+     * Retrieves all spells of a character by the character's name.
+     * @param name the name of the character
+     * @return an Optional containing the character's DTO if found, or an empty Optional if not found
+     */
+    Optional<CharacterDTO> getCharacterSpellsByName(String name);
 }
