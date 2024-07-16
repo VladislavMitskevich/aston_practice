@@ -6,6 +6,9 @@ import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.repository.CharacterRepository;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.exception.CharacterNotFoundException;
+import org.examle.aston_practice.spellbook.exception.InvalidInputException;
+import org.examle.aston_practice.spellbook.validator.CharacterValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,24 +37,34 @@ public class CharacterServiceImpl implements CharacterService {
 
     @Override
     public Optional<CharacterDTO> getCharacterById(Long id) {
-        return characterRepository.findById(id)
-                .map(characterMapper::toDto);
+        Optional<Character> character = characterRepository.findById(id);
+        if (character.isPresent()) {
+            return Optional.of(characterMapper.toDto(character.get()));
+        } else {
+            throw new CharacterNotFoundException("Character with id " + id + " not found");
+        }
     }
 
     @Override
     public Optional<CharacterDTO> getCharacterByName(String name) {
-        return characterRepository.findByName(name)
-                .map(characterMapper::toDto);
+        Optional<Character> character = characterRepository.findByName(name);
+        if (character.isPresent()) {
+            return Optional.of(characterMapper.toDto(character.get()));
+        } else {
+            throw new CharacterNotFoundException("Character with name " + name + " not found");
+        }
     }
 
     @Override
     public void createCharacter(CharacterDTO characterDTO) {
+        CharacterValidator.validate(characterDTO);
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.save(character);
     }
 
     @Override
     public void updateCharacter(CharacterDTO characterDTO) {
+        CharacterValidator.validate(characterDTO);
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.update(character);
     }
@@ -83,7 +96,11 @@ public class CharacterServiceImpl implements CharacterService {
     }
     @Override
     public Optional<CharacterDTO> getCharacterSpellsByName(String name) {
-        return characterRepository.findByName(name)
-                .map(characterMapper::toDto);
+        Optional<Character> character = characterRepository.findByName(name);
+        if (character.isPresent()) {
+            return Optional.of(characterMapper.toDto(character.get()));
+        } else {
+            throw new CharacterNotFoundException("Character with name " + name + " not found");
+        }
     }
 }
