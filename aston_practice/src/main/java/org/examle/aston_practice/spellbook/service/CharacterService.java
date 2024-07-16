@@ -24,6 +24,13 @@ public interface CharacterService {
     Optional<CharacterDTO> getCharacterById(Long id);
 
     /**
+     * Retrieves a character by its name.
+     * @param name the name of the character to retrieve
+     * @return an Optional containing the character as a DTO if found, or an empty Optional if not found
+     */
+    Optional<CharacterDTO> getCharacterByName(String name);
+
+    /**
      * Creates a new character.
      * @param characterDTO the character DTO to create
      */
@@ -54,4 +61,11 @@ public interface CharacterService {
      * @param spellId the ID of the spell
      */
     void addSpellToCharacter(Long characterId, Long spellId);
+
+    /**
+     * Retrieves all characters who have a specific spell.
+     * @param spellName the name of the spell
+     * @return a list of characters as DTOs that have the specified spell
+     */
+    List<CharacterDTO> getCharactersBySpellName(String spellName);
 }
