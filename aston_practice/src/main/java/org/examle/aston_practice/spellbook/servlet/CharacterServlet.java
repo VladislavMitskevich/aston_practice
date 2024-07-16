@@ -3,6 +3,8 @@ package org.examle.aston_practice.spellbook.servlet;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.exception.CharacterNotFoundException;
+import org.examle.aston_practice.spellbook.exception.InvalidInputException;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.CharacterRepositoryImpl;
@@ -37,13 +39,13 @@ public class CharacterServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
-        String casterClassParam = req.getParameter("casterClass");
-        String nameParam = req.getParameter("name");
-        String spellNameParam = req.getParameter("spellName");
+        try {
+            String idParam = req.getParameter("id");
+            String casterClassParam = req.getParameter("casterClass");
+            String nameParam = req.getParameter("name");
+            String spellNameParam = req.getParameter("spellName");
 
-        if (idParam != null) {
-            try {
+            if (idParam != null) {
                 Long id = Long.valueOf(idParam);
                 Optional<CharacterDTO> character = characterService.getCharacterById(id);
                 if (character.isPresent()) {
@@ -51,79 +53,98 @@ public class CharacterServlet extends HttpServlet {
                     resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
                 } else {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.getWriter().write("Character not found");
                 }
-            } catch (NumberFormatException e) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            }
-        } else if (casterClassParam != null) {
-            try {
+            } else if (casterClassParam != null) {
                 CasterClass casterClass = CasterClass.valueOf(casterClassParam);
                 List<CharacterDTO> characters = characterService.getCharactersByCasterClass(casterClass);
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
-            } catch (IllegalArgumentException e) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            }
-        } else if (nameParam != null) {
-            Optional<CharacterDTO> character = characterService.getCharacterSpellsByName(nameParam);
-            if (character.isPresent()) {
+            } else if (nameParam != null) {
+                Optional<CharacterDTO> character = characterService.getCharacterSpellsByName(nameParam);
+                if (character.isPresent()) {
+                    resp.setContentType("application/json");
+                    resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.getWriter().write("Character not found");
+                }
+            } else if (spellNameParam != null) {
+                List<CharacterDTO> characters = characterService.getCharactersBySpellName(spellNameParam);
                 resp.setContentType("application/json");
-                resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
+                resp.getWriter().write(objectMapper.writeValueAsString(characters));
             } else {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                List<CharacterDTO> characters = characterService.getAllCharacters();
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(characters));
             }
-        } else if (spellNameParam != null) {
-            List<CharacterDTO> characters = characterService.getCharactersBySpellName(spellNameParam);
-            resp.setContentType("application/json");
-            resp.getWriter().write(objectMapper.writeValueAsString(characters));
-        } else {
-            List<CharacterDTO> characters = characterService.getAllCharacters();
-            resp.setContentType("application/json");
-            resp.getWriter().write(objectMapper.writeValueAsString(characters));
+        } catch (CharacterNotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().write(e.getMessage());
+        } catch (InvalidInputException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(e.getMessage());
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("Internal server error");
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-        characterService.createCharacter(characterDTO);
-        resp.setStatus(HttpServletResponse.SC_CREATED);
+        try {
+            CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
+            characterService.createCharacter(characterDTO);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+        } catch (InvalidInputException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(e.getMessage());
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("Internal server error");
+        }
     }
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String characterIdParam = req.getParameter("characterId");
-        String spellIdParam = req.getParameter("spellId");
+        try {
+            String characterIdParam = req.getParameter("characterId");
+            String spellIdParam = req.getParameter("spellId");
 
-        if (characterIdParam != null && spellIdParam != null) {
-            try {
+            if (characterIdParam != null && spellIdParam != null) {
                 Long characterId = Long.valueOf(characterIdParam);
                 Long spellId = Long.valueOf(spellIdParam);
                 characterService.addSpellToCharacter(characterId, spellId);
                 resp.setStatus(HttpServletResponse.SC_OK);
-            } catch (NumberFormatException e) {
-                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            } else {
+                CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
+                characterService.updateCharacter(characterDTO);
+                resp.setStatus(HttpServletResponse.SC_OK);
             }
-        } else {
-            CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-            characterService.updateCharacter(characterDTO);
-            resp.setStatus(HttpServletResponse.SC_OK);
+        } catch (InvalidInputException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write(e.getMessage());
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("Internal server error");
         }
     }
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String idParam = req.getParameter("id");
-        if (idParam != null) {
-            try {
+        try {
+            String idParam = req.getParameter("id");
+            if (idParam != null) {
                 Long id = Long.valueOf(idParam);
                 characterService.deleteCharacter(id);
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            } catch (NumberFormatException e) {
+            } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().write("Missing 'id' parameter");
             }
-        } else {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().write("Internal server error");
         }
     }
 }
