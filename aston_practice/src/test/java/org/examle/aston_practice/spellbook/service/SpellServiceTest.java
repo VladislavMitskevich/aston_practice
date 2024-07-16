@@ -86,4 +86,35 @@ public class SpellServiceTest {
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
     }
+
+    @Test
+    public void testUpdateSpell() {
+        when(spellMapper.toEntity(spellDTO)).thenReturn(spell);
+        doNothing().when(spellRepository).update(spell);
+
+        spellService.updateSpell(spellDTO);
+
+        verify(spellRepository, times(1)).update(spell);
+    }
+
+    @Test
+    public void testDeleteSpell() {
+        doNothing().when(spellRepository).deleteById(1L);
+
+        spellService.deleteSpell(1L);
+
+        verify(spellRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    public void testGetAllSpells() {
+        List<Spell> spells = Arrays.asList(spell);
+        when(spellRepository.findAll()).thenReturn(spells);
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
+
+        List<SpellDTO> result = spellService.getAllSpells();
+
+        assertEquals(1, result.size());
+        assertEquals(spellDTO, result.get(0));
+    }
 }
