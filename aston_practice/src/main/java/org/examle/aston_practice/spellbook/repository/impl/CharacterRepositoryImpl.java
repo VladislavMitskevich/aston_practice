@@ -131,6 +131,43 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    @Override
+    public Optional<Character> findByName(String name) {
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement("SELECT * FROM characters WHERE name = ?")) {
+            statement.setString(1, name);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                Character character = mapResultSetToCharacter(resultSet);
+                return Optional.of(character);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Character> findBySpellName(String spellName) {
+        List<Character> characters = new ArrayList<>();
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT c.* FROM characters c " +
+                             "JOIN character_spells cs ON c.id = cs.character_id " +
+                             "JOIN spells s ON cs.spell_id = s.id " +
+                             "WHERE s.name = ?")) {
+            statement.setString(1, spellName);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Character character = mapResultSetToCharacter(resultSet);
+                characters.add(character);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return characters;
+    }
+
     /**
      * Maps a ResultSet to a Character entity.
      * @param resultSet the ResultSet to map
