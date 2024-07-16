@@ -65,7 +65,7 @@ public class CharacterServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
         } else if (nameParam != null) {
-            Optional<CharacterDTO> character = characterService.getCharacterByName(nameParam);
+            Optional<CharacterDTO> character = characterService.getCharacterSpellsByName(nameParam);
             if (character.isPresent()) {
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
