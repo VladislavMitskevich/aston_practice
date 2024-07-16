@@ -146,4 +146,23 @@ public class CharacterServiceTest {
         assertEquals(characterDTO, result.get(0));
     }
 
+    @Test
+    public void testGetCharacterSpellsByName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+
+        Optional<CharacterDTO> result = characterService.getCharacterSpellsByName("Gandalf");
+
+        assertTrue(result.isPresent());
+        assertEquals(characterDTO, result.get());
+    }
+
+    @Test
+    public void testGetCharacterSpellsByName_NotFound() {
+        when(characterRepository.findByName("Unknown")).thenReturn(Optional.empty());
+
+        Optional<CharacterDTO> result = characterService.getCharacterSpellsByName("Unknown");
+
+        assertFalse(result.isPresent());
+    }
 }

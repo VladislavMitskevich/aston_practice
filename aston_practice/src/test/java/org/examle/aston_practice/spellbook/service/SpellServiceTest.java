@@ -117,4 +117,31 @@ public class SpellServiceTest {
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
     }
+
+    @Test
+    public void testGetSpellById_NotFound() {
+        when(spellRepository.findById(2L)).thenReturn(Optional.empty());
+
+        Optional<SpellDTO> result = spellService.getSpellById(2L);
+
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    public void testGetSpellsByCasterClassAndCircle_NotFound() {
+        when(spellRepository.findByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.FOURTH)).thenReturn(Arrays.asList());
+
+        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.FOURTH);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testGetAllSpells_EmptyList() {
+        when(spellRepository.findAll()).thenReturn(Arrays.asList());
+
+        List<SpellDTO> result = spellService.getAllSpells();
+
+        assertTrue(result.isEmpty());
+    }
 }
