@@ -7,6 +7,8 @@ import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.SpellService;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
+import org.examle.aston_practice.spellbook.validator.SpellValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,18 +37,24 @@ public class SpellServiceImpl implements SpellService {
 
     @Override
     public Optional<SpellDTO> getSpellById(Long id) {
-        return spellRepository.findById(id)
-                .map(spellMapper::toDto);
+        Optional<Spell> spell = spellRepository.findById(id);
+        if (spell.isPresent()) {
+            return Optional.of(spellMapper.toDto(spell.get()));
+        } else {
+            throw new SpellNotFoundException("Spell with id " + id + " not found");
+        }
     }
 
     @Override
     public void createSpell(SpellDTO spellDTO) {
+        SpellValidator.validate(spellDTO);
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.save(spell);
     }
 
     @Override
     public void updateSpell(SpellDTO spellDTO) {
+        SpellValidator.validate(spellDTO);
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.update(spell);
     }
