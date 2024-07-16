@@ -39,6 +39,8 @@ public class CharacterServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idParam = req.getParameter("id");
         String casterClassParam = req.getParameter("casterClass");
+        String nameParam = req.getParameter("name");
+        String spellNameParam = req.getParameter("spellName");
 
         if (idParam != null) {
             try {
@@ -62,6 +64,18 @@ public class CharacterServlet extends HttpServlet {
             } catch (IllegalArgumentException e) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             }
+        } else if (nameParam != null) {
+            Optional<CharacterDTO> character = characterService.getCharacterByName(nameParam);
+            if (character.isPresent()) {
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
+            } else {
+                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } else if (spellNameParam != null) {
+            List<CharacterDTO> characters = characterService.getCharactersBySpellName(spellNameParam);
+            resp.setContentType("application/json");
+            resp.getWriter().write(objectMapper.writeValueAsString(characters));
         } else {
             List<CharacterDTO> characters = characterService.getAllCharacters();
             resp.setContentType("application/json");
