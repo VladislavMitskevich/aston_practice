@@ -27,20 +27,20 @@ public interface CharacterService {
 
     /**
      * Retrieves a character by its name.
-     * @param name the name of the character to retrieve
+     * @param name the name of the character to retrieve, cannot be null
      * @return an Optional containing the character as a DTO if found, or an empty Optional if not found
      */
     Optional<CharacterDTO> getCharacterByName(String name);
 
     /**
      * Creates a new character.
-     * @param characterDTO the character DTO to create
+     * @param characterDTO the character DTO to create, cannot be null
      */
     void createCharacter(CharacterDTO characterDTO);
 
     /**
      * Updates an existing character.
-     * @param characterDTO the character DTO to update
+     * @param characterDTO the character DTO to update, cannot be null
      */
     void updateCharacter(CharacterDTO characterDTO);
 
@@ -52,7 +52,7 @@ public interface CharacterService {
 
     /**
      * Retrieves characters by caster class.
-     * @param casterClass the caster class
+     * @param casterClass the caster class, cannot be null
      * @return a list of characters as DTOs that match the specified caster class
      */
     List<CharacterDTO> getCharactersByCasterClass(CasterClass casterClass);
@@ -66,22 +66,22 @@ public interface CharacterService {
 
     /**
      * Retrieves all characters who have a specific spell.
-     * @param spellName the name of the spell
+     * @param spellName the name of the spell, cannot be null
      * @return a list of characters as DTOs that have the specified spell
      */
     List<CharacterDTO> getCharactersBySpellName(String spellName);
 
     /**
      * Retrieves all spells of a character by the character's name.
-     * @param name the name of the character
+     * @param name the name of the character, cannot be null
      * @return a list of spells as DTOs that the character has
      */
     List<SpellDTO> getSpellsByCharacterName(String name);
 
     /**
      * Retrieves all spells available for a specific caster class and spell circle.
-     * @param casterClass the caster class
-     * @param spellCircle the spell circle
+     * @param casterClass the caster class, cannot be null
+     * @param spellCircle the spell circle, cannot be null
      * @return a list of spells as DTOs that match the specified caster class and spell circle
      */
     List<SpellDTO> getSpellsByCasterClassAndSpellCircle(CasterClass casterClass, SpellCircle spellCircle);
@@ -89,7 +89,7 @@ public interface CharacterService {
     /**
      * Adds a new spell to a character's spell list.
      * @param characterId the ID of the character
-     * @param spellDTO the spell DTO to add
+     * @param spellDTO the spell DTO to add, cannot be null
      */
     void addNewSpellToCharacter(Long characterId, SpellDTO spellDTO);
 }

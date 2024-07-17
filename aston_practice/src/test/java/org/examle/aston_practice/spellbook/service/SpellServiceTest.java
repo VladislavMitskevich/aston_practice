@@ -48,7 +48,7 @@ public class SpellServiceTest {
         spellDTO.setName("Fireball");
         spellDTO.setSchool(SchoolOfMagic.EVOCATION);
         spellDTO.setCircle(SpellCircle.THIRD);
-        spellDTO.setDescription("A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame."); // Установите значение для description
+        spellDTO.setDescription("A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame.");
 
         spell = new Spell();
         spell.setId(1L);
@@ -72,6 +72,17 @@ public class SpellServiceTest {
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
         Optional<SpellDTO> result = spellService.getSpellById(1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(spellDTO, result.get());
+    }
+
+    @Test
+    public void testGetSpellByName() {
+        when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
+
+        Optional<SpellDTO> result = spellService.getSpellByName("Fireball");
 
         assertTrue(result.isPresent());
         assertEquals(spellDTO, result.get());
@@ -119,17 +130,6 @@ public class SpellServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
-    }
-
-    @Test
-    public void testGetSpellByName() {
-        when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
-        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
-
-        Optional<SpellDTO> result = spellService.getSpellByName("Fireball");
-
-        assertTrue(result.isPresent());
-        assertEquals(spellDTO, result.get());
     }
 
     @Test

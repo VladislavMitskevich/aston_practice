@@ -3,16 +3,19 @@ package org.examle.aston_practice.spellbook.dto;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
  * Data Transfer Object for Spell.
  * This class is used to transfer spell data between different layers of the application.
  */
-@Data
+@Getter
+@Setter
 public class SpellDTO {
     /**
      * Unique identifier for the spell.
@@ -50,14 +53,6 @@ public class SpellDTO {
     private List<CharacterDTO> characters;
 
     /**
-     * Sets the list of characters that have this spell.
-     * @param characters list of characters
-     */
-    public void setCharacters(List<CharacterDTO> characters) {
-        this.characters = characters;
-    }
-
-    /**
      * Returns a string representation of the spell.
      * @return spell details as a string
      */
@@ -70,7 +65,35 @@ public class SpellDTO {
                 ", circle=" + circle +
                 ", casterClasses=" + casterClasses +
                 ", description='" + description + '\'' +
-                ", characters=" + characters +
+                ", characters=" + (characters != null ? characters : "null") +
                 '}';
+    }
+
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     * @param o the reference object with which to compare.
+     * @return true if this object is the same as the obj argument; false otherwise.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpellDTO spellDTO = (SpellDTO) o;
+        return Objects.equals(id, spellDTO.id) &&
+                Objects.equals(name, spellDTO.name) &&
+                school == spellDTO.school &&
+                circle == spellDTO.circle &&
+                Objects.equals(casterClasses, spellDTO.casterClasses) &&
+                Objects.equals(description, spellDTO.description) &&
+                Objects.equals(characters, spellDTO.characters);
+    }
+
+    /**
+     * Returns a hash code value for the object.
+     * @return a hash code value for this object.
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, school, circle, casterClasses, description, characters);
     }
 }

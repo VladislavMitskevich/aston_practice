@@ -23,6 +23,7 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public List<Spell> findAll() {
+        logger.info("Fetching all spells from the database");
         List<Spell> spells = new ArrayList<>();
         String sql = "SELECT * FROM spells";
         try (Connection connection = DatabaseUtil.getConnection();
@@ -32,6 +33,7 @@ public class SpellRepositoryImpl implements SpellRepository {
                 Spell spell = mapResultSetToSpell(resultSet);
                 spells.add(spell);
             }
+            logger.info("Retrieved {} spells", spells.size());
         } catch (SQLException e) {
             logger.error("Failed to retrieve spells from the database", e);
             throw new RuntimeException("Failed to retrieve spells from the database", e);
@@ -41,24 +43,37 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public Optional<Spell> findById(Long id) {
+        if (id == null) {
+            logger.error("Spell ID cannot be null");
+            throw new IllegalArgumentException("Spell ID cannot be null");
+        }
+        logger.info("Fetching spell by ID: {}", id);
         String sql = "SELECT * FROM spells WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return Optional.of(mapResultSetToSpell(resultSet));
+                    Spell spell = mapResultSetToSpell(resultSet);
+                    logger.info("Found spell: {}", spell);
+                    return Optional.of(spell);
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to retrieve spell with id " + id, e);
+            logger.error("Failed to retrieve spell with id {}", id, e);
             throw new RuntimeException("Failed to retrieve spell with id " + id, e);
         }
+        logger.info("Spell with ID {} not found", id);
         return Optional.empty();
     }
 
     @Override
     public void save(Spell spell) {
+        if (spell == null) {
+            logger.error("Spell cannot be null");
+            throw new IllegalArgumentException("Spell cannot be null");
+        }
+        logger.info("Saving spell: {}", spell);
         String sql = "INSERT INTO spells (name, school, circle, description) VALUES (?, ?, ?, ?)";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -73,6 +88,7 @@ public class SpellRepositoryImpl implements SpellRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     spell.setId(generatedKeys.getLong(1));
+                    logger.info("Spell saved with ID: {}", spell.getId());
                 } else {
                     throw new SQLException("Creating spell failed, no ID obtained.");
                 }
@@ -85,6 +101,11 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public void update(Spell spell) {
+        if (spell == null) {
+            logger.error("Spell cannot be null");
+            throw new IllegalArgumentException("Spell cannot be null");
+        }
+        logger.info("Updating spell: {}", spell);
         String sql = "UPDATE spells SET name = ?, school = ?, circle = ?, description = ? WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -94,27 +115,39 @@ public class SpellRepositoryImpl implements SpellRepository {
             statement.setString(4, spell.getDescription());
             statement.setLong(5, spell.getId());
             statement.executeUpdate();
+            logger.info("Spell with ID {} updated", spell.getId());
         } catch (SQLException e) {
-            logger.error("Failed to update spell with id " + spell.getId(), e);
+            logger.error("Failed to update spell with id {}", spell.getId(), e);
             throw new RuntimeException("Failed to update spell with id " + spell.getId(), e);
         }
     }
 
     @Override
     public void deleteById(Long id) {
+        if (id == null) {
+            logger.error("Spell ID cannot be null");
+            throw new IllegalArgumentException("Spell ID cannot be null");
+        }
+        logger.info("Deleting spell by ID: {}", id);
         String sql = "DELETE FROM spells WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             statement.executeUpdate();
+            logger.info("Spell with ID {} deleted", id);
         } catch (SQLException e) {
-            logger.error("Failed to delete spell with id " + id, e);
+            logger.error("Failed to delete spell with id {}", id, e);
             throw new RuntimeException("Failed to delete spell with id " + id, e);
         }
     }
 
     @Override
     public List<Spell> findByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle) {
+        if (casterClass == null || circle == null) {
+            logger.error("Caster class and circle cannot be null");
+            throw new IllegalArgumentException("Caster class and circle cannot be null");
+        }
+        logger.info("Fetching spells by caster class {} and circle {}", casterClass, circle);
         List<Spell> spells = new ArrayList<>();
         String sql = "SELECT s.* FROM spells s JOIN spell_caster_classes sc ON s.id = sc.spell_id WHERE sc.caster_class = ? AND s.circle = ?";
         try (Connection connection = DatabaseUtil.getConnection();
@@ -127,8 +160,9 @@ public class SpellRepositoryImpl implements SpellRepository {
                     spells.add(spell);
                 }
             }
+            logger.info("Retrieved {} spells for caster class {} and circle {}", spells.size(), casterClass, circle);
         } catch (SQLException e) {
-            logger.error("Failed to retrieve spells by caster class and circle", e);
+            logger.error("Failed to retrieve spells by caster class {} and circle {}", casterClass, circle, e);
             throw new RuntimeException("Failed to retrieve spells by caster class and circle", e);
         }
         return spells;
@@ -136,24 +170,37 @@ public class SpellRepositoryImpl implements SpellRepository {
 
     @Override
     public Optional<Spell> findByName(String name) {
+        if (name == null) {
+            logger.error("Spell name cannot be null");
+            throw new IllegalArgumentException("Spell name cannot be null");
+        }
+        logger.info("Fetching spell by name: {}", name);
         String sql = "SELECT * FROM spells WHERE name = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, name);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return Optional.of(mapResultSetToSpell(resultSet));
+                    Spell spell = mapResultSetToSpell(resultSet);
+                    logger.info("Found spell: {}", spell);
+                    return Optional.of(spell);
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to retrieve spell by name", e);
+            logger.error("Failed to retrieve spell by name {}", name, e);
             throw new RuntimeException("Failed to retrieve spell by name", e);
         }
+        logger.info("Spell with name {} not found", name);
         return Optional.empty();
     }
 
     @Override
     public List<Character> findCharactersBySpellName(String spellName) {
+        if (spellName == null) {
+            logger.error("Spell name cannot be null");
+            throw new IllegalArgumentException("Spell name cannot be null");
+        }
+        logger.info("Fetching characters by spell name: {}", spellName);
         List<Character> characters = new ArrayList<>();
         String sql = "SELECT c.* FROM characters c " +
                 "JOIN character_spells cs ON c.id = cs.character_id " +
@@ -168,8 +215,9 @@ public class SpellRepositoryImpl implements SpellRepository {
                     characters.add(character);
                 }
             }
+            logger.info("Retrieved {} characters for spell name {}", characters.size(), spellName);
         } catch (SQLException e) {
-            logger.error("Failed to retrieve characters by spell name", e);
+            logger.error("Failed to retrieve characters by spell name {}", spellName, e);
             throw new RuntimeException("Failed to retrieve characters by spell name", e);
         }
         return characters;
@@ -212,7 +260,7 @@ public class SpellRepositoryImpl implements SpellRepository {
                 }
             }
         } catch (SQLException e) {
-            logger.error("Failed to retrieve caster classes for spell with id " + spellId, e);
+            logger.error("Failed to retrieve caster classes for spell with id {}", spellId, e);
             throw new RuntimeException("Failed to retrieve caster classes for spell with id " + spellId, e);
         }
         return casterClasses;

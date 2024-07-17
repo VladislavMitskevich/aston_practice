@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +35,7 @@ public class CharacterServiceTest {
     private CharacterMapper characterMapper;
 
     @Mock
-    private Character character; // Добавляем аннотацию @Mock для character
+    private Character character;
 
     @InjectMocks
     private CharacterServiceImpl characterService;
@@ -85,17 +84,15 @@ public class CharacterServiceTest {
         assertEquals(characterDTO, result.get());
     }
 
-    @ParameterizedTest
-    @EnumSource(CasterClass.class)
-    public void testGetCharactersByCasterClass(CasterClass casterClass) {
-        List<Character> characters = Arrays.asList(character);
-        when(characterRepository.findByCasterClass(casterClass)).thenReturn(characters);
+    @Test
+    public void testGetCharacterByName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = characterService.getCharactersByCasterClass(casterClass);
+        Optional<CharacterDTO> result = characterService.getCharacterByName("Gandalf");
 
-        assertEquals(1, result.size());
-        assertEquals(characterDTO, result.get(0));
+        assertTrue(result.isPresent());
+        assertEquals(characterDTO, result.get());
     }
 
     @Test
@@ -129,21 +126,32 @@ public class CharacterServiceTest {
         assertEquals(characterDTO, result.get(0));
     }
 
-    @Test
-    public void testGetCharacterByName() {
-        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+    @ParameterizedTest
+    @EnumSource(CasterClass.class)
+    public void testGetCharactersByCasterClass(CasterClass casterClass) {
+        List<Character> characters = Arrays.asList(character);
+        when(characterRepository.findByCasterClass(casterClass)).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        Optional<CharacterDTO> result = characterService.getCharacterByName("Gandalf");
+        List<CharacterDTO> result = characterService.getCharactersByCasterClass(casterClass);
 
-        assertTrue(result.isPresent());
-        assertEquals(characterDTO, result.get());
+        assertEquals(1, result.size());
+        assertEquals(characterDTO, result.get(0));
+    }
+
+    @Test
+    public void testAddSpellToCharacter() {
+        doNothing().when(characterRepository).addSpellToCharacter(1L, 1L);
+
+        characterService.addSpellToCharacter(1L, 1L);
+
+        verify(characterRepository, times(1)).addSpellToCharacter(1L, 1L);
     }
 
     @Test
     public void testGetCharactersBySpellName() {
         List<Character> characters = Arrays.asList(character);
-        when(characterRepository.findBySpellName("Fireball")).thenReturn(characters);
+        when(characterRepository.findCharactersBySpellName("Fireball")).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
         List<CharacterDTO> result = characterService.getCharactersBySpellName("Fireball");
@@ -156,7 +164,7 @@ public class CharacterServiceTest {
     public void testGetSpellsByCharacterName() {
         List<Spell> spells = Arrays.asList(spell);
         when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
-        when(character.getSpells()).thenReturn(spells); // Используем мок для character
+        when(character.getSpells()).thenReturn(spells);
         when(characterMapper.spellToDto(spell)).thenReturn(spellDTO);
 
         List<SpellDTO> result = characterService.getSpellsByCharacterName("Gandalf");

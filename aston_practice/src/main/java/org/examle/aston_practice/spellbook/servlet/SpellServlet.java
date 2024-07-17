@@ -11,6 +11,8 @@ import org.examle.aston_practice.spellbook.service.SpellService;
 import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.SpellRepositoryImpl;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -29,15 +31,18 @@ public class SpellServlet extends HttpServlet {
 
     private SpellService spellService;
     private ObjectMapper objectMapper;
+    private static final Logger logger = LoggerFactory.getLogger(SpellServlet.class);
 
     @Override
     public void init() throws ServletException {
         spellService = new SpellServiceImpl(new SpellRepositoryImpl(), new SpellMapper());
         objectMapper = new ObjectMapper();
+        logger.info("123: SpellServlet initialized");
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("123: doGet method called");
         try {
             String idParam = req.getParameter("id");
             String nameParam = req.getParameter("name");
@@ -46,6 +51,7 @@ public class SpellServlet extends HttpServlet {
             String includeCharactersParam = req.getParameter("includeCharacters");
 
             if (idParam != null) {
+                logger.info("123: Fetching spell by ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 Optional<SpellDTO> spell = spellService.getSpellById(id);
                 if (spell.isPresent()) {
@@ -56,9 +62,11 @@ public class SpellServlet extends HttpServlet {
                     resp.getWriter().write("Spell not found");
                 }
             } else if (nameParam != null) {
+                logger.info("123: Fetching spell by name: {}", nameParam);
                 Optional<SpellDTO> spell = spellService.getSpellByName(nameParam);
                 if (spell.isPresent()) {
-                    if (includeCharactersParam != null && Boolean.parseBoolean(includeCharactersParam)) {
+                    if (Boolean.parseBoolean(includeCharactersParam)) {
+                        logger.info("123: Fetching characters by spell name: {}", nameParam);
                         List<CharacterDTO> characters = spellService.getCharactersBySpellName(nameParam);
                         spell.get().setCharacters(characters);
                     }
@@ -69,29 +77,36 @@ public class SpellServlet extends HttpServlet {
                     resp.getWriter().write("Spell not found");
                 }
             } else if (casterClassParam != null && circleParam != null) {
+                logger.info("123: Fetching spells by caster class: {} and circle: {}", casterClassParam, circleParam);
                 CasterClass casterClass = CasterClass.valueOf(casterClassParam);
                 SpellCircle circle = SpellCircle.valueOf(circleParam);
                 List<SpellDTO> spells = spellService.getSpellsByCasterClassAndCircle(casterClass, circle);
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(spells));
             } else {
+                logger.info("123: Fetching all spells");
                 List<SpellDTO> spells = spellService.getAllSpells();
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(spells));
             }
         } catch (NumberFormatException e) {
+            logger.error("123: Invalid 'id' parameter", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Invalid 'id' parameter");
         } catch (IllegalArgumentException e) {
+            logger.error("123: Invalid 'casterClass' or 'circle' parameter", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Invalid 'casterClass' or 'circle' parameter");
         } catch (SpellNotFoundException e) {
+            logger.error("123: Spell not found", e);
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             resp.getWriter().write(e.getMessage());
         } catch (InvalidInputException e) {
+            logger.error("123: Invalid input", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(e.getMessage());
         } catch (Exception e) {
+            logger.error("123: Internal server error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Internal server error");
         }
@@ -99,14 +114,18 @@ public class SpellServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("123: doPost method called");
         try {
             SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
+            logger.info("123: Creating spell: {}", spellDTO);
             spellService.createSpell(spellDTO);
             resp.setStatus(HttpServletResponse.SC_CREATED);
         } catch (InvalidInputException e) {
+            logger.error("123: Invalid input", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(e.getMessage());
         } catch (Exception e) {
+            logger.error("123: Internal server error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Internal server error");
         }
@@ -114,14 +133,18 @@ public class SpellServlet extends HttpServlet {
 
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("123: doPut method called");
         try {
             SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
+            logger.info("123: Updating spell: {}", spellDTO);
             spellService.updateSpell(spellDTO);
             resp.setStatus(HttpServletResponse.SC_OK);
         } catch (InvalidInputException e) {
+            logger.error("123: Invalid input", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(e.getMessage());
         } catch (Exception e) {
+            logger.error("123: Internal server error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Internal server error");
         }
@@ -129,20 +152,25 @@ public class SpellServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        logger.info("123: doDelete method called");
         try {
             String idParam = req.getParameter("id");
             if (idParam != null) {
+                logger.info("123: Deleting spell by ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 spellService.deleteSpell(id);
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             } else {
+                logger.warn("123: Missing 'id' parameter");
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().write("Missing 'id' parameter");
             }
         } catch (NumberFormatException e) {
+            logger.error("123: Invalid 'id' parameter", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write("Invalid 'id' parameter");
         } catch (Exception e) {
+            logger.error("123: Internal server error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Internal server error");
         }

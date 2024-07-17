@@ -70,7 +70,7 @@ public interface CharacterRepository {
      * @param spellName the name of the spell
      * @return list of characters that have the specified spell
      */
-    List<Character> findBySpellName(String spellName);
+    List<Character> findCharactersBySpellName(String spellName);
 
     /**
      * Finds all spells of a character by the character's name.
@@ -93,11 +93,4 @@ public interface CharacterRepository {
      * @param spell the spell to add
      */
     void addNewSpellToCharacter(Long characterId, Spell spell);
-
-    /**
-     * Finds all characters who have a specific spell.
-     * @param spellName the name of the spell
-     * @return list of characters that have the specified spell
-     */
-    List<Character> findCharactersBySpellName(String spellName);
 }

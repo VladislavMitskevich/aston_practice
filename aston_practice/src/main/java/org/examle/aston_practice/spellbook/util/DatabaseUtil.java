@@ -21,8 +21,8 @@ public class DatabaseUtil {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
-            logger.error("Failed to load MySQL JDBC driver", e);
-            throw new RuntimeException("Failed to load MySQL JDBC driver", e);
+            logger.error("MySQL JDBC driver not found.", e);
+            throw new RuntimeException("MySQL JDBC driver not found.", e);
         }
     }
 
@@ -33,11 +33,13 @@ public class DatabaseUtil {
      * @throws SQLException if a database access error occurs
      */
     public static Connection getConnection() throws SQLException {
-        Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-        if (connection != null) {
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(URL, USER, PASSWORD);
             logger.info("Connection to database successful!");
-        } else {
-            logger.error("Failed to establish connection to the database.");
+        } catch (SQLException e) {
+            logger.error("Failed to connect to the database.", e);
+            throw e;
         }
         return connection;
     }

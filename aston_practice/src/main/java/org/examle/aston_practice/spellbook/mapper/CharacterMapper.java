@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Mapper for converting Character entities to DTOs and vice versa.
- */
 public class CharacterMapper {
 
     private final SpellMapper spellMapper;
@@ -22,43 +19,42 @@ public class CharacterMapper {
     }
 
     public CharacterDTO toDto(Character character) {
-        CharacterDTO dto = new CharacterDTO();
-        dto.setId(character.getId());
-        dto.setName(character.getName());
-        dto.setCasterClass(character.getCasterClass());
-        dto.setLevel(character.getLevel());
-        dto.setSpellsByCircle(mapSpellsByCircleToDto(character.getSpellsByCircle()));
-        return dto;
-    }
-
-    public Character toEntity(CharacterDTO dto) {
-        Character character = new Character();
-        character.setId(dto.getId());
-        character.setName(dto.getName());
-        character.setCasterClass(dto.getCasterClass());
-        character.setLevel(dto.getLevel());
-        character.setSpellsByCircle(mapSpellsByCircleToEntity(dto.getSpellsByCircle()));
-        return character;
-    }
-
-    private Map<SpellCircle, List<SpellDTO>> mapSpellsByCircleToDto(Map<SpellCircle, List<Spell>> spellsByCircleEntity) {
-        return spellsByCircleEntity.entrySet().stream()
+        CharacterDTO characterDTO = new CharacterDTO();
+        characterDTO.setId(character.getId());
+        characterDTO.setName(character.getName());
+        characterDTO.setCasterClass(character.getCasterClass());
+        characterDTO.setLevel(character.getLevel());
+        Map<SpellCircle, List<SpellDTO>> spellsByCircleDTO = character.getSpellsByCircle().entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> entry.getValue().stream()
                                 .map(spellMapper::toDto)
                                 .collect(Collectors.toList())
                 ));
+        characterDTO.setSpells(spellsByCircleDTO);
+        return characterDTO;
     }
 
-    private Map<SpellCircle, List<Spell>> mapSpellsByCircleToEntity(Map<SpellCircle, List<SpellDTO>> spellsByCircleDto) {
-        return spellsByCircleDto.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue().stream()
-                                .map(spellMapper::toEntity)
-                                .collect(Collectors.toList())
-                ));
+    public Character toEntity(CharacterDTO characterDTO) {
+        Character character = new Character();
+        character.setId(characterDTO.getId());
+        character.setName(characterDTO.getName());
+        character.setCasterClass(characterDTO.getCasterClass());
+        character.setLevel(characterDTO.getLevel());
+
+        // Добавляем проверку на null
+        if (characterDTO.getSpellsByCircle() != null) {
+            Map<SpellCircle, List<Spell>> spellsByCircle = characterDTO.getSpellsByCircle().entrySet().stream()
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            entry -> entry.getValue().stream()
+                                    .map(spellMapper::toEntity)
+                                    .collect(Collectors.toList())
+                    ));
+            character.setSpells(spellsByCircle);
+        }
+
+        return character;
     }
 
     public SpellDTO spellToDto(Spell spell) {

@@ -4,40 +4,67 @@ import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.entity.Character;
 import org.examle.aston_practice.spellbook.entity.Spell;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
-/**
- * Mapper for converting Spell entities to DTOs and vice versa.
- */
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class SpellMapper {
 
     public SpellDTO toDto(Spell spell) {
-        SpellDTO dto = new SpellDTO();
-        dto.setId(spell.getId());
-        dto.setName(spell.getName());
-        dto.setSchool(spell.getSchool());
-        dto.setCircle(spell.getCircle());
-        dto.setCasterClasses(spell.getCasterClasses());
-        dto.setDescription(spell.getDescription());
-        return dto;
+        SpellDTO spellDTO = new SpellDTO();
+        spellDTO.setId(spell.getId());
+        spellDTO.setName(spell.getName());
+        spellDTO.setSchool(spell.getSchool());
+        spellDTO.setCircle(spell.getCircle());
+        spellDTO.setDescription(spell.getDescription());
+        spellDTO.setCasterClasses(spell.getCasterClasses());
+        return spellDTO;
     }
 
-    public Spell toEntity(SpellDTO dto) {
+    public Spell toEntity(SpellDTO spellDTO) {
         Spell spell = new Spell();
-        spell.setId(dto.getId());
-        spell.setName(dto.getName());
-        spell.setSchool(dto.getSchool());
-        spell.setCircle(dto.getCircle());
-        spell.setCasterClasses(dto.getCasterClasses());
-        spell.setDescription(dto.getDescription());
+        spell.setId(spellDTO.getId());
+        spell.setName(spellDTO.getName());
+        spell.setSchool(spellDTO.getSchool());
+        spell.setCircle(spellDTO.getCircle());
+        spell.setDescription(spellDTO.getDescription());
+        spell.setCasterClasses(spellDTO.getCasterClasses());
         return spell;
     }
 
     public CharacterDTO characterToDto(Character character) {
-        CharacterDTO dto = new CharacterDTO();
-        dto.setId(character.getId());
-        dto.setName(character.getName());
-        dto.setCasterClass(character.getCasterClass());
-        dto.setLevel(character.getLevel());
-        return dto;
+        CharacterDTO characterDTO = new CharacterDTO();
+        characterDTO.setId(character.getId());
+        characterDTO.setName(character.getName());
+        characterDTO.setCasterClass(character.getCasterClass());
+        characterDTO.setLevel(character.getLevel());
+        Map<SpellCircle, List<SpellDTO>> spellsByCircleDTO = character.getSpellsByCircle().entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .map(this::toDto)
+                                .collect(Collectors.toList())
+                ));
+        characterDTO.setSpells(spellsByCircleDTO);
+        return characterDTO;
+    }
+
+    public Character dtoToCharacter(CharacterDTO characterDTO) {
+        Character character = new Character();
+        character.setId(characterDTO.getId());
+        character.setName(characterDTO.getName());
+        character.setCasterClass(characterDTO.getCasterClass());
+        character.setLevel(characterDTO.getLevel());
+        Map<SpellCircle, List<Spell>> spellsByCircle = characterDTO.getSpellsByCircle().entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> entry.getValue().stream()
+                                .map(this::toEntity)
+                                .collect(Collectors.toList())
+                ));
+        character.setSpells(spellsByCircle);
+        return character;
     }
 }
