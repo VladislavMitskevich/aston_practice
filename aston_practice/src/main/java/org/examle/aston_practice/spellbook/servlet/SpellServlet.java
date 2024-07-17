@@ -1,6 +1,7 @@
 package org.examle.aston_practice.spellbook.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
@@ -39,13 +40,28 @@ public class SpellServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             String idParam = req.getParameter("id");
+            String nameParam = req.getParameter("name");
             String casterClassParam = req.getParameter("casterClass");
             String circleParam = req.getParameter("circle");
+            String includeCharactersParam = req.getParameter("includeCharacters");
 
             if (idParam != null) {
                 Long id = Long.valueOf(idParam);
                 Optional<SpellDTO> spell = spellService.getSpellById(id);
                 if (spell.isPresent()) {
+                    resp.setContentType("application/json");
+                    resp.getWriter().write(objectMapper.writeValueAsString(spell.get()));
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    resp.getWriter().write("Spell not found");
+                }
+            } else if (nameParam != null) {
+                Optional<SpellDTO> spell = spellService.getSpellByName(nameParam);
+                if (spell.isPresent()) {
+                    if (includeCharactersParam != null && Boolean.parseBoolean(includeCharactersParam)) {
+                        List<CharacterDTO> characters = spellService.getCharactersBySpellName(nameParam);
+                        spell.get().setCharacters(characters);
+                    }
                     resp.setContentType("application/json");
                     resp.getWriter().write(objectMapper.writeValueAsString(spell.get()));
                 } else {
@@ -63,6 +79,12 @@ public class SpellServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(spells));
             }
+        } catch (NumberFormatException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Invalid 'id' parameter");
+        } catch (IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Invalid 'casterClass' or 'circle' parameter");
         } catch (SpellNotFoundException e) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             resp.getWriter().write(e.getMessage());
@@ -117,6 +139,9 @@ public class SpellServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().write("Missing 'id' parameter");
             }
+        } catch (NumberFormatException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().write("Invalid 'id' parameter");
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().write("Internal server error");

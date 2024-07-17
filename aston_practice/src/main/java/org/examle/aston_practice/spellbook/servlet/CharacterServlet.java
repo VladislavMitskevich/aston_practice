@@ -2,7 +2,9 @@ package org.examle.aston_practice.spellbook.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
+import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import org.examle.aston_practice.spellbook.exception.CharacterNotFoundException;
 import org.examle.aston_practice.spellbook.exception.InvalidInputException;
 import org.examle.aston_practice.spellbook.service.CharacterService;
@@ -44,6 +46,8 @@ public class CharacterServlet extends HttpServlet {
             String casterClassParam = req.getParameter("casterClass");
             String nameParam = req.getParameter("name");
             String spellNameParam = req.getParameter("spellName");
+            String casterClassForSpellsParam = req.getParameter("casterClassForSpells");
+            String spellCircleParam = req.getParameter("spellCircle");
 
             if (idParam != null) {
                 Long id = Long.valueOf(idParam);
@@ -61,18 +65,19 @@ public class CharacterServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
             } else if (nameParam != null) {
-                Optional<CharacterDTO> character = characterService.getCharacterSpellsByName(nameParam);
-                if (character.isPresent()) {
-                    resp.setContentType("application/json");
-                    resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
-                } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    resp.getWriter().write("Character not found");
-                }
+                List<SpellDTO> spells = characterService.getSpellsByCharacterName(nameParam);
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(spells));
             } else if (spellNameParam != null) {
                 List<CharacterDTO> characters = characterService.getCharactersBySpellName(spellNameParam);
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
+            } else if (casterClassForSpellsParam != null && spellCircleParam != null) {
+                CasterClass casterClass = CasterClass.valueOf(casterClassForSpellsParam);
+                SpellCircle spellCircle = SpellCircle.valueOf(spellCircleParam);
+                List<SpellDTO> spells = characterService.getSpellsByCasterClassAndSpellCircle(casterClass, spellCircle);
+                resp.setContentType("application/json");
+                resp.getWriter().write(objectMapper.writeValueAsString(spells));
             } else {
                 List<CharacterDTO> characters = characterService.getAllCharacters();
                 resp.setContentType("application/json");
@@ -93,9 +98,17 @@ public class CharacterServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
-            characterService.createCharacter(characterDTO);
-            resp.setStatus(HttpServletResponse.SC_CREATED);
+            String characterIdParam = req.getParameter("characterId");
+            if (characterIdParam != null) {
+                Long characterId = Long.valueOf(characterIdParam);
+                SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
+                characterService.addNewSpellToCharacter(characterId, spellDTO);
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+            } else {
+                CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
+                characterService.createCharacter(characterDTO);
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+            }
         } catch (InvalidInputException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().write(e.getMessage());

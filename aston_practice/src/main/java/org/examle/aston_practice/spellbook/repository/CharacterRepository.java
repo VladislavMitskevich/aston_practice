@@ -1,6 +1,7 @@
 package org.examle.aston_practice.spellbook.repository;
 
 import org.examle.aston_practice.spellbook.entity.Character;
+import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
@@ -70,4 +71,33 @@ public interface CharacterRepository {
      * @return list of characters that have the specified spell
      */
     List<Character> findBySpellName(String spellName);
+
+    /**
+     * Finds all spells of a character by the character's name.
+     * @param name the name of the character
+     * @return list of spells that the character has
+     */
+    List<Spell> findSpellsByCharacterName(String name);
+
+    /**
+     * Finds all spells available for a specific caster class and spell circle.
+     * @param casterClass the caster class
+     * @param spellCircle the spell circle
+     * @return list of spells that match the specified caster class and spell circle
+     */
+    List<Spell> findSpellsByCasterClassAndSpellCircle(CasterClass casterClass, SpellCircle spellCircle);
+
+    /**
+     * Adds a new spell to a character's spell list.
+     * @param characterId the ID of the character
+     * @param spell the spell to add
+     */
+    void addNewSpellToCharacter(Long characterId, Spell spell);
+
+    /**
+     * Finds all characters who have a specific spell.
+     * @param spellName the name of the spell
+     * @return list of characters that have the specified spell
+     */
+    List<Character> findCharactersBySpellName(String spellName);
 }

@@ -41,4 +41,20 @@ public class DatabaseUtil {
         }
         return connection;
     }
+
+    /**
+     * Closes the given database connection.
+     *
+     * @param connection the Connection object to close
+     */
+    public static void closeConnection(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+                logger.info("Connection to database closed successfully!");
+            } catch (SQLException e) {
+                logger.error("Failed to close connection to the database.", e);
+            }
+        }
+    }
 }

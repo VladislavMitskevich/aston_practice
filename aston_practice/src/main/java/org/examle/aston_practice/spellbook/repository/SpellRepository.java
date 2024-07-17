@@ -1,5 +1,6 @@
 package org.examle.aston_practice.spellbook.repository;
 
+import org.examle.aston_practice.spellbook.entity.Character;
 import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
@@ -27,6 +28,13 @@ public interface SpellRepository {
     Optional<Spell> findById(Long id);
 
     /**
+     * Finds a spell by its name.
+     * @param name the name of the spell to retrieve
+     * @return an Optional containing the spell if found, or an empty Optional if not found
+     */
+    Optional<Spell> findByName(String name);
+
+    /**
      * Saves a new spell to the database.
      * @param spell the spell to save
      */
@@ -51,4 +59,11 @@ public interface SpellRepository {
      * @return list of spells that match the specified caster class and circle
      */
     List<Spell> findByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle);
+
+    /**
+     * Finds all characters who can cast a specific spell.
+     * @param spellName the name of the spell
+     * @return list of characters that can cast the specified spell
+     */
+    List<Character> findCharactersBySpellName(String spellName);
 }

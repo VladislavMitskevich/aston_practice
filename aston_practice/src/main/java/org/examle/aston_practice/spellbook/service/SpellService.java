@@ -1,5 +1,6 @@
 package org.examle.aston_practice.spellbook.service;
 
+import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
@@ -23,6 +24,13 @@ public interface SpellService {
      * @return an Optional containing the spell as a DTO if found, or an empty Optional if not found
      */
     Optional<SpellDTO> getSpellById(Long id);
+
+    /**
+     * Retrieves a spell by its name.
+     * @param name the name of the spell to retrieve
+     * @return an Optional containing the spell as a DTO if found, or an empty Optional if not found
+     */
+    Optional<SpellDTO> getSpellByName(String name);
 
     /**
      * Creates a new spell.
@@ -49,4 +57,11 @@ public interface SpellService {
      * @return a list of spells as DTOs that match the specified caster class and circle
      */
     List<SpellDTO> getSpellsByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle);
+
+    /**
+     * Retrieves all characters who can cast a specific spell.
+     * @param spellName the name of the spell
+     * @return a list of characters as DTOs that can cast the specified spell
+     */
+    List<CharacterDTO> getCharactersBySpellName(String spellName);
 }

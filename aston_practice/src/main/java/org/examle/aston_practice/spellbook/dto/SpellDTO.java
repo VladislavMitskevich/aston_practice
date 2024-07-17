@@ -5,6 +5,7 @@ import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import lombok.Data;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -44,6 +45,19 @@ public class SpellDTO {
     private String description;
 
     /**
+     * List of characters that have this spell.
+     */
+    private List<CharacterDTO> characters;
+
+    /**
+     * Sets the list of characters that have this spell.
+     * @param characters list of characters
+     */
+    public void setCharacters(List<CharacterDTO> characters) {
+        this.characters = characters;
+    }
+
+    /**
      * Returns a string representation of the spell.
      * @return spell details as a string
      */
@@ -56,6 +70,7 @@ public class SpellDTO {
                 ", circle=" + circle +
                 ", casterClasses=" + casterClasses +
                 ", description='" + description + '\'' +
+                ", characters=" + characters +
                 '}';
     }
 }

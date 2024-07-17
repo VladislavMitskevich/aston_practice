@@ -1,7 +1,9 @@
 package org.examle.aston_practice.spellbook.service;
 
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
+import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +74,22 @@ public interface CharacterService {
     /**
      * Retrieves all spells of a character by the character's name.
      * @param name the name of the character
-     * @return an Optional containing the character's DTO if found, or an empty Optional if not found
+     * @return a list of spells as DTOs that the character has
      */
-    Optional<CharacterDTO> getCharacterSpellsByName(String name);
+    List<SpellDTO> getSpellsByCharacterName(String name);
+
+    /**
+     * Retrieves all spells available for a specific caster class and spell circle.
+     * @param casterClass the caster class
+     * @param spellCircle the spell circle
+     * @return a list of spells as DTOs that match the specified caster class and spell circle
+     */
+    List<SpellDTO> getSpellsByCasterClassAndSpellCircle(CasterClass casterClass, SpellCircle spellCircle);
+
+    /**
+     * Adds a new spell to a character's spell list.
+     * @param characterId the ID of the character
+     * @param spellDTO the spell DTO to add
+     */
+    void addNewSpellToCharacter(Long characterId, SpellDTO spellDTO);
 }

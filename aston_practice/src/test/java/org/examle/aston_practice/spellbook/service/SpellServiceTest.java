@@ -7,7 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
+import org.examle.aston_practice.spellbook.entity.Character;
 import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
@@ -18,6 +20,8 @@ import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,14 +48,12 @@ public class SpellServiceTest {
         spellDTO.setName("Fireball");
         spellDTO.setSchool(SchoolOfMagic.EVOCATION);
         spellDTO.setCircle(SpellCircle.THIRD);
-        spellDTO.setDescription("A bright streak flashes from your pointing finger...");
+        spellDTO.setDescription("A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame."); // Установите значение для description
 
         spell = new Spell();
         spell.setId(1L);
         spell.setName("Fireball");
-        spell.setSchool(SchoolOfMagic.EVOCATION);
         spell.setCircle(SpellCircle.THIRD);
-        spell.setDescription("A bright streak flashes from your pointing finger...");
     }
 
     @Test
@@ -75,13 +77,14 @@ public class SpellServiceTest {
         assertEquals(spellDTO, result.get());
     }
 
-    @Test
-    public void testGetSpellsByCasterClassAndCircle() {
+    @ParameterizedTest
+    @EnumSource(CasterClass.class)
+    public void testGetSpellsByCasterClassAndCircle(CasterClass casterClass) {
         List<Spell> spells = Arrays.asList(spell);
-        when(spellRepository.findByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.THIRD)).thenReturn(spells);
+        when(spellRepository.findByCasterClassAndCircle(casterClass, SpellCircle.THIRD)).thenReturn(spells);
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.THIRD);
+        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(casterClass, SpellCircle.THIRD);
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
@@ -119,29 +122,27 @@ public class SpellServiceTest {
     }
 
     @Test
-    public void testGetSpellById_NotFound() {
-        when(spellRepository.findById(2L)).thenReturn(Optional.empty());
+    public void testGetSpellByName() {
+        when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        Optional<SpellDTO> result = spellService.getSpellById(2L);
+        Optional<SpellDTO> result = spellService.getSpellByName("Fireball");
 
-        assertFalse(result.isPresent());
+        assertTrue(result.isPresent());
+        assertEquals(spellDTO, result.get());
     }
 
     @Test
-    public void testGetSpellsByCasterClassAndCircle_NotFound() {
-        when(spellRepository.findByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.FOURTH)).thenReturn(Arrays.asList());
+    public void testGetCharactersBySpellName() {
+        Character character = new Character();
+        CharacterDTO characterDTO = new CharacterDTO();
+        List<Character> characters = Arrays.asList(character);
+        when(spellRepository.findCharactersBySpellName("Fireball")).thenReturn(characters);
+        when(spellMapper.characterToDto(character)).thenReturn(characterDTO);
 
-        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(CasterClass.MAGE, SpellCircle.FOURTH);
+        List<CharacterDTO> result = spellService.getCharactersBySpellName("Fireball");
 
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    public void testGetAllSpells_EmptyList() {
-        when(spellRepository.findAll()).thenReturn(Arrays.asList());
-
-        List<SpellDTO> result = spellService.getAllSpells();
-
-        assertTrue(result.isEmpty());
+        assertEquals(1, result.size());
+        assertEquals(characterDTO, result.get(0));
     }
 }

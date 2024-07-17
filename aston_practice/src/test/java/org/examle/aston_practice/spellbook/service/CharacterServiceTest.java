@@ -4,18 +4,24 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
+import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.entity.Character;
+import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
+import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.repository.CharacterRepository;
 import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -29,11 +35,15 @@ public class CharacterServiceTest {
     @Mock
     private CharacterMapper characterMapper;
 
+    @Mock
+    private Character character; // Добавляем аннотацию @Mock для character
+
     @InjectMocks
     private CharacterServiceImpl characterService;
 
     private CharacterDTO characterDTO;
-    private Character character;
+    private SpellDTO spellDTO;
+    private Spell spell;
 
     @BeforeEach
     public void setUp() {
@@ -43,11 +53,15 @@ public class CharacterServiceTest {
         characterDTO.setCasterClass(CasterClass.MAGE);
         characterDTO.setLevel(10);
 
-        character = new Character();
-        character.setId(1L);
-        character.setName("Gandalf");
-        character.setCasterClass(CasterClass.MAGE);
-        character.setLevel(10);
+        spellDTO = new SpellDTO();
+        spellDTO.setId(1L);
+        spellDTO.setName("Fireball");
+        spellDTO.setCircle(SpellCircle.THIRD);
+
+        spell = new Spell();
+        spell.setId(1L);
+        spell.setName("Fireball");
+        spell.setCircle(SpellCircle.THIRD);
     }
 
     @Test
@@ -71,22 +85,14 @@ public class CharacterServiceTest {
         assertEquals(characterDTO, result.get());
     }
 
-    @Test
-    public void testAddSpellToCharacter() {
-        doNothing().when(characterRepository).addSpellToCharacter(1L, 1L);
-
-        characterService.addSpellToCharacter(1L, 1L);
-
-        verify(characterRepository, times(1)).addSpellToCharacter(1L, 1L);
-    }
-
-    @Test
-    public void testGetCharactersByCasterClass() {
+    @ParameterizedTest
+    @EnumSource(CasterClass.class)
+    public void testGetCharactersByCasterClass(CasterClass casterClass) {
         List<Character> characters = Arrays.asList(character);
-        when(characterRepository.findByCasterClass(CasterClass.MAGE)).thenReturn(characters);
+        when(characterRepository.findByCasterClass(casterClass)).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = characterService.getCharactersByCasterClass(CasterClass.MAGE);
+        List<CharacterDTO> result = characterService.getCharactersByCasterClass(casterClass);
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
@@ -147,22 +153,38 @@ public class CharacterServiceTest {
     }
 
     @Test
-    public void testGetCharacterSpellsByName() {
+    public void testGetSpellsByCharacterName() {
+        List<Spell> spells = Arrays.asList(spell);
         when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
-        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+        when(character.getSpells()).thenReturn(spells); // Используем мок для character
+        when(characterMapper.spellToDto(spell)).thenReturn(spellDTO);
 
-        Optional<CharacterDTO> result = characterService.getCharacterSpellsByName("Gandalf");
+        List<SpellDTO> result = characterService.getSpellsByCharacterName("Gandalf");
 
-        assertTrue(result.isPresent());
-        assertEquals(characterDTO, result.get());
+        assertEquals(1, result.size());
+        assertEquals(spellDTO, result.get(0));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = CasterClass.class, names = {"MAGE", "CLERIC", "DRUID", "SORCERER", "WIZARD"})
+    public void testGetSpellsByCasterClassAndSpellCircle(CasterClass casterClass) {
+        List<Spell> spells = Arrays.asList(spell);
+        when(characterRepository.findSpellsByCasterClassAndSpellCircle(casterClass, SpellCircle.THIRD)).thenReturn(spells);
+        when(characterMapper.spellToDto(spell)).thenReturn(spellDTO);
+
+        List<SpellDTO> result = characterService.getSpellsByCasterClassAndSpellCircle(casterClass, SpellCircle.THIRD);
+
+        assertEquals(1, result.size());
+        assertEquals(spellDTO, result.get(0));
     }
 
     @Test
-    public void testGetCharacterSpellsByName_NotFound() {
-        when(characterRepository.findByName("Unknown")).thenReturn(Optional.empty());
+    public void testAddNewSpellToCharacter() {
+        when(characterMapper.dtoToSpell(spellDTO)).thenReturn(spell);
+        doNothing().when(characterRepository).addNewSpellToCharacter(1L, spell);
 
-        Optional<CharacterDTO> result = characterService.getCharacterSpellsByName("Unknown");
+        characterService.addNewSpellToCharacter(1L, spellDTO);
 
-        assertFalse(result.isPresent());
+        verify(characterRepository, times(1)).addNewSpellToCharacter(1L, spell);
     }
 }

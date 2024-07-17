@@ -1,5 +1,6 @@
 package org.examle.aston_practice.spellbook.service.impl;
 
+import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
@@ -46,6 +47,16 @@ public class SpellServiceImpl implements SpellService {
     }
 
     @Override
+    public Optional<SpellDTO> getSpellByName(String name) {
+        Optional<Spell> spell = spellRepository.findByName(name);
+        if (spell.isPresent()) {
+            return Optional.of(spellMapper.toDto(spell.get()));
+        } else {
+            throw new SpellNotFoundException("Spell with name " + name + " not found");
+        }
+    }
+
+    @Override
     public void createSpell(SpellDTO spellDTO) {
         SpellValidator.validate(spellDTO);
         Spell spell = spellMapper.toEntity(spellDTO);
@@ -69,6 +80,14 @@ public class SpellServiceImpl implements SpellService {
         return spellRepository.findByCasterClassAndCircle(casterClass, circle)
                 .stream()
                 .map(spellMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CharacterDTO> getCharactersBySpellName(String spellName) {
+        return spellRepository.findCharactersBySpellName(spellName)
+                .stream()
+                .map(spellMapper::characterToDto)
                 .collect(Collectors.toList());
     }
 }
