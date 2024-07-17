@@ -175,6 +175,13 @@ public class SpellRepositoryImpl implements SpellRepository {
         return characters;
     }
 
+    /**
+     * Maps a ResultSet to a Spell object.
+     *
+     * @param resultSet The ResultSet containing the spell data.
+     * @return A Spell object populated with data from the ResultSet.
+     * @throws SQLException if an error occurs while accessing the data in the ResultSet.
+     */
     private Spell mapResultSetToSpell(ResultSet resultSet) throws SQLException {
         Spell spell = new Spell();
         spell.setId(resultSet.getLong("id"));
@@ -186,6 +193,13 @@ public class SpellRepositoryImpl implements SpellRepository {
         return spell;
     }
 
+    /**
+     * Retrieves the set of CasterClass values associated with a given spell ID.
+     *
+     * @param spellId The ID of the spell for which to retrieve the caster classes.
+     * @return A Set of CasterClass values associated with the spell.
+     * @throws RuntimeException if an error occurs while retrieving the caster classes.
+     */
     private Set<CasterClass> getCasterClassesForSpell(Long spellId) {
         Set<CasterClass> casterClasses = new HashSet<>();
         String sql = "SELECT caster_class FROM spell_caster_classes WHERE spell_id = ?";
@@ -204,6 +218,13 @@ public class SpellRepositoryImpl implements SpellRepository {
         return casterClasses;
     }
 
+    /**
+     * Maps a ResultSet to a Character object.
+     *
+     * @param resultSet The ResultSet containing the character data.
+     * @return A Character object populated with data from the ResultSet.
+     * @throws SQLException if an error occurs while accessing the data in the ResultSet.
+     */
     private Character mapResultSetToCharacter(ResultSet resultSet) throws SQLException {
         Character character = new Character();
         character.setId(resultSet.getLong("id"));

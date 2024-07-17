@@ -280,16 +280,30 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return characters;
     }
 
+    /**
+     * Maps a ResultSet to a Spell object.
+     *
+     * @param resultSet The ResultSet containing the spell data.
+     * @return A Spell object populated with data from the ResultSet.
+     * @throws SQLException if an error occurs while accessing the data in the ResultSet.
+     */
     private Spell mapResultSetToSpell(ResultSet resultSet) throws SQLException {
         Spell spell = new Spell();
         spell.setId(resultSet.getLong("id"));
         spell.setName(resultSet.getString("name"));
-        spell.setSchool(SchoolOfMagic.valueOf(resultSet.getString("school"))); // Преобразование строки в enum
+        spell.setSchool(SchoolOfMagic.valueOf(resultSet.getString("school")));
         spell.setCircle(SpellCircle.valueOf(resultSet.getString("circle")));
         spell.setDescription(resultSet.getString("description"));
         return spell;
     }
 
+    /**
+     * Maps a ResultSet to a Character object.
+     *
+     * @param resultSet The ResultSet containing the character data.
+     * @return A Character object populated with data from the ResultSet.
+     * @throws SQLException if an error occurs while accessing the data in the ResultSet.
+     */
     private Character mapResultSetToCharacter(ResultSet resultSet) throws SQLException {
         Character character = new Character();
         character.setId(resultSet.getLong("id"));
