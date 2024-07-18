@@ -23,11 +23,13 @@ public class SpellMapperTest {
 
     @BeforeEach
     public void setUp() {
+        // Initialize the SpellMapper instance before each test
         spellMapper = new SpellMapper();
     }
 
     @Test
     public void testToDto() {
+        // Create a Spell entity for testing
         Spell spell = new Spell();
         spell.setId(1L);
         spell.setName("Fireball");
@@ -36,8 +38,10 @@ public class SpellMapperTest {
         spell.setDescription("A fireball spell");
         spell.setCasterClasses(new HashSet<>(Arrays.asList(CasterClass.MAGE)));
 
+        // Convert the Spell entity to a SpellDTO using the mapper
         SpellDTO spellDTO = spellMapper.toDto(spell);
 
+        // Assert that the conversion is correct
         assertEquals(spell.getId(), spellDTO.getId());
         assertEquals(spell.getName(), spellDTO.getName());
         assertEquals(spell.getSchool(), spellDTO.getSchool());
@@ -48,6 +52,7 @@ public class SpellMapperTest {
 
     @Test
     public void testToEntity() {
+        // Create a SpellDTO for testing
         SpellDTO spellDTO = new SpellDTO();
         spellDTO.setId(1L);
         spellDTO.setName("Fireball");
@@ -56,8 +61,10 @@ public class SpellMapperTest {
         spellDTO.setDescription("A fireball spell");
         spellDTO.setCasterClasses(new HashSet<>(Arrays.asList(CasterClass.MAGE)));
 
+        // Convert the SpellDTO to a Spell entity using the mapper
         Spell spell = spellMapper.toEntity(spellDTO);
 
+        // Assert that the conversion is correct
         assertEquals(spellDTO.getId(), spell.getId());
         assertEquals(spellDTO.getName(), spell.getName());
         assertEquals(spellDTO.getSchool(), spell.getSchool());
@@ -68,12 +75,14 @@ public class SpellMapperTest {
 
     @Test
     public void testCharacterToDto() {
+        // Create a Character entity for testing
         Character character = new Character();
         character.setId(1L);
         character.setName("Test Character");
         character.setCasterClass(CasterClass.MAGE);
         character.setLevel(10);
 
+        // Create a Spell entity associated with the Character
         Spell spell = new Spell();
         spell.setId(1L);
         spell.setName("Fireball");
@@ -82,12 +91,15 @@ public class SpellMapperTest {
         spell.setDescription("A fireball spell");
         spell.setCasterClasses(new HashSet<>(Arrays.asList(CasterClass.MAGE)));
 
+        // Map spells to their respective circles
         Map<SpellCircle, List<Spell>> spellsByCircle = new HashMap<>();
         spellsByCircle.put(SpellCircle.THIRD, Arrays.asList(spell));
         character.setSpellsByCircle(spellsByCircle);
 
+        // Convert the Character entity to a CharacterDTO using the mapper
         CharacterDTO characterDTO = spellMapper.characterToDto(character);
 
+        // Assert that the conversion is correct
         assertEquals(character.getId(), characterDTO.getId());
         assertEquals(character.getName(), characterDTO.getName());
         assertEquals(character.getCasterClass(), characterDTO.getCasterClass());
@@ -99,12 +111,14 @@ public class SpellMapperTest {
 
     @Test
     public void testDtoToCharacter() {
+        // Create a CharacterDTO for testing
         CharacterDTO characterDTO = new CharacterDTO();
         characterDTO.setId(1L);
         characterDTO.setName("Test Character");
         characterDTO.setCasterClass(CasterClass.MAGE);
         characterDTO.setLevel(10);
 
+        // Create a SpellDTO associated with the CharacterDTO
         SpellDTO spellDTO = new SpellDTO();
         spellDTO.setId(1L);
         spellDTO.setName("Fireball");
@@ -113,12 +127,15 @@ public class SpellMapperTest {
         spellDTO.setDescription("A fireball spell");
         spellDTO.setCasterClasses(new HashSet<>(Arrays.asList(CasterClass.MAGE)));
 
+        // Map spells to their respective circles
         Map<SpellCircle, List<SpellDTO>> spellsByCircleDTO = new HashMap<>();
         spellsByCircleDTO.put(SpellCircle.THIRD, Arrays.asList(spellDTO));
         characterDTO.setSpellsByCircle(spellsByCircleDTO);
 
+        // Convert the CharacterDTO to a Character entity using the mapper
         Character character = spellMapper.dtoToCharacter(characterDTO);
 
+        // Assert that the conversion is correct
         assertEquals(characterDTO.getId(), character.getId());
         assertEquals(characterDTO.getName(), character.getName());
         assertEquals(characterDTO.getCasterClass(), character.getCasterClass());
@@ -131,17 +148,22 @@ public class SpellMapperTest {
     @ParameterizedTest
     @MethodSource("provideSpellsForConversion")
     public void testToDtoParameterized(Spell spell, SpellDTO expectedSpellDTO) {
+        // Convert the Spell entity to a SpellDTO using the mapper
         SpellDTO result = spellMapper.toDto(spell);
+        // Assert that the conversion is correct
         assertEquals(expectedSpellDTO, result);
     }
 
     @ParameterizedTest
     @MethodSource("provideSpellsForConversion")
     public void testToEntityParameterized(Spell expectedSpell, SpellDTO spellDTO) {
+        // Convert the SpellDTO to a Spell entity using the mapper
         Spell result = spellMapper.toEntity(spellDTO);
+        // Assert that the conversion is correct
         assertEquals(expectedSpell, result);
     }
 
+    // Provide test data for parameterized tests
     private static Stream<Object[]> provideSpellsForConversion() {
         Spell spell = new Spell();
         spell.setId(1L);

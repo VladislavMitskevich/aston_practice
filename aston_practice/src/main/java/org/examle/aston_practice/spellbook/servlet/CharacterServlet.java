@@ -36,6 +36,11 @@ public class CharacterServlet extends HttpServlet {
     private ObjectMapper objectMapper;
     private static final Logger logger = LoggerFactory.getLogger(CharacterServlet.class);
 
+    /**
+     * Initializes the servlet by setting up the necessary services and dependencies.
+     *
+     * @throws ServletException if an error occurs during initialization
+     */
     @Override
     public void init() throws ServletException {
         SpellMapper spellMapper = new SpellMapper();
@@ -46,6 +51,14 @@ public class CharacterServlet extends HttpServlet {
         logger.info("CharacterServlet initialized");
     }
 
+    /**
+     * Handles GET requests for character-related data.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doGet method called");
@@ -59,6 +72,7 @@ public class CharacterServlet extends HttpServlet {
             String includeSpellsParam = req.getParameter("includeSpells");
 
             if (idParam != null) {
+                // Fetch character by ID
                 logger.info("Fetching character by ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 Optional<CharacterDTO> character = characterService.getCharacterById(id);
@@ -70,6 +84,7 @@ public class CharacterServlet extends HttpServlet {
                     resp.getWriter().write("Character not found");
                 }
             } else if (casterClassParam != null) {
+                // Fetch characters by caster class
                 logger.info("Fetching characters by caster class: {}", casterClassParam);
                 CasterClass casterClass = CasterClass.valueOf(casterClassParam);
                 List<CharacterDTO> characters = characterService.getCharactersByCasterClass(casterClass);
@@ -77,22 +92,26 @@ public class CharacterServlet extends HttpServlet {
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
             } else if (characterNameParam != null) {
                 if (Boolean.parseBoolean(includeSpellsParam)) {
+                    // Fetch spells by character name
                     logger.info("Fetching spells by character name: {}", characterNameParam);
                     List<SpellDTO> spells = characterService.getSpellsByCharacterName(characterNameParam);
                     resp.setContentType("application/json");
                     resp.getWriter().write(objectMapper.writeValueAsString(spells));
                 } else {
+                    // Fetch character by name
                     logger.info("Fetching character by name: {}", characterNameParam);
                     CharacterDTO character = characterService.getCharacterByName(characterNameParam);
                     resp.setContentType("application/json");
                     resp.getWriter().write(objectMapper.writeValueAsString(character));
                 }
             } else if (spellNameParam != null) {
+                // Fetch characters by spell name
                 logger.info("Fetching characters by spell name: {}", spellNameParam);
                 List<CharacterDTO> characters = characterService.getCharactersBySpellName(spellNameParam);
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
             } else if (casterClassForSpellsParam != null && spellCircleParam != null) {
+                // Fetch spells by caster class and spell circle
                 logger.info("Fetching spells by caster class: {} and spell circle: {}", casterClassForSpellsParam, spellCircleParam);
                 CasterClass casterClass = CasterClass.valueOf(casterClassForSpellsParam);
                 SpellCircle spellCircle = SpellCircle.valueOf(spellCircleParam);
@@ -100,6 +119,7 @@ public class CharacterServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(spells));
             } else {
+                // Fetch all characters
                 logger.info("Fetching all characters");
                 List<CharacterDTO> characters = characterService.getAllCharacters();
                 resp.setContentType("application/json");
@@ -120,6 +140,14 @@ public class CharacterServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles POST requests for creating new characters or adding spells to existing characters.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doPost method called");
@@ -128,10 +156,12 @@ public class CharacterServlet extends HttpServlet {
             String spellNameParam = req.getParameter("spellName");
 
             if (characterNameParam != null && spellNameParam != null) {
+                // Add spell to character by name
                 logger.info("Adding spell with name: {} to character with name: {}", spellNameParam, characterNameParam);
                 characterService.addSpellToCharacterByName(characterNameParam, spellNameParam);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
             } else {
+                // Create new character
                 logger.info("Creating new character");
                 CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
                 characterService.createCharacter(characterDTO);
@@ -148,18 +178,28 @@ public class CharacterServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PUT requests for updating existing characters or adding new spells to characters.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doPut method called");
         try {
             String characterIdParam = req.getParameter("characterId");
             if (characterIdParam != null) {
+                // Add new spell to character by ID
                 logger.info("Adding new spell to character with ID: {}", characterIdParam);
                 Long characterId = Long.valueOf(characterIdParam);
                 SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
                 characterService.addNewSpellToCharacter(characterId, spellDTO);
                 resp.setStatus(HttpServletResponse.SC_OK);
             } else {
+                // Update character
                 logger.info("Updating character");
                 CharacterDTO characterDTO = objectMapper.readValue(req.getReader(), CharacterDTO.class);
                 characterService.updateCharacter(characterDTO);
@@ -176,12 +216,21 @@ public class CharacterServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting characters.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doDelete method called");
         try {
             String idParam = req.getParameter("id");
             if (idParam != null) {
+                // Delete character by ID
                 logger.info("Deleting character with ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 characterService.deleteCharacter(id);

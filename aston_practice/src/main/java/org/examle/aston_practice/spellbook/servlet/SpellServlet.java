@@ -34,6 +34,11 @@ public class SpellServlet extends HttpServlet {
     private ObjectMapper objectMapper;
     private static final Logger logger = LoggerFactory.getLogger(SpellServlet.class);
 
+    /**
+     * Initializes the servlet by setting up the necessary services and dependencies.
+     *
+     * @throws ServletException if an error occurs during initialization
+     */
     @Override
     public void init() throws ServletException {
         SpellMapper spellMapper = new SpellMapper();
@@ -43,6 +48,14 @@ public class SpellServlet extends HttpServlet {
         logger.info("SpellServlet initialized");
     }
 
+    /**
+     * Handles GET requests for spell-related data.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doGet method called");
@@ -54,6 +67,7 @@ public class SpellServlet extends HttpServlet {
             String includeCharactersParam = req.getParameter("includeCharacters");
 
             if (idParam != null) {
+                // Fetch spell by ID
                 logger.info("Fetching spell by ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 Optional<SpellDTO> spell = spellService.getSpellById(id);
@@ -65,10 +79,12 @@ public class SpellServlet extends HttpServlet {
                     resp.getWriter().write("Spell not found");
                 }
             } else if (nameParam != null) {
+                // Fetch spell by name
                 logger.info("Fetching spell by name: {}", nameParam);
                 Optional<SpellDTO> spell = spellService.getSpellByName(nameParam);
                 if (spell.isPresent()) {
                     if (Boolean.parseBoolean(includeCharactersParam)) {
+                        // Fetch characters by spell name
                         logger.info("Fetching characters by spell name: {}", nameParam);
                         List<CharacterDTO> characters = spellService.getCharactersBySpellName(nameParam);
                         spell.get().setCharacters(characters);
@@ -80,6 +96,7 @@ public class SpellServlet extends HttpServlet {
                     resp.getWriter().write("Spell not found");
                 }
             } else if (casterClassParam != null && circleParam != null) {
+                // Fetch spells by caster class and circle
                 logger.info("Fetching spells by caster class: {} and circle: {}", casterClassParam, circleParam);
                 CasterClass casterClass = CasterClass.valueOf(casterClassParam);
                 SpellCircle circle = SpellCircle.valueOf(circleParam);
@@ -87,6 +104,7 @@ public class SpellServlet extends HttpServlet {
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(spells));
             } else {
+                // Fetch all spells
                 logger.info("Fetching all spells");
                 List<SpellDTO> spells = spellService.getAllSpells();
                 resp.setContentType("application/json");
@@ -115,6 +133,14 @@ public class SpellServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles POST requests for creating new spells.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doPost method called");
@@ -134,6 +160,14 @@ public class SpellServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles PUT requests for updating existing spells.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doPut method called");
@@ -153,12 +187,21 @@ public class SpellServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Handles DELETE requests for deleting spells.
+     *
+     * @param req  the HttpServletRequest object
+     * @param resp the HttpServletResponse object
+     * @throws ServletException if an error occurs during the servlet's processing
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doDelete method called");
         try {
             String idParam = req.getParameter("id");
             if (idParam != null) {
+                // Delete spell by ID
                 logger.info("Deleting spell by ID: {}", idParam);
                 Long id = Long.valueOf(idParam);
                 spellService.deleteSpell(id);

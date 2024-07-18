@@ -17,10 +17,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * Implementation of the SpellRepository interface that provides CRUD operations
+ * for Spell entities using a relational database.
+ */
 public class SpellRepositoryImpl implements SpellRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(SpellRepositoryImpl.class);
 
+    /**
+     * Fetches all spells from the database.
+     *
+     * @return a list of all spells
+     */
     @Override
     public List<Spell> findAll() {
         logger.info("Fetching all spells from the database");
@@ -41,6 +50,12 @@ public class SpellRepositoryImpl implements SpellRepository {
         return spells;
     }
 
+    /**
+     * Fetches a spell by its ID from the database.
+     *
+     * @param id the ID of the spell to fetch
+     * @return an Optional containing the spell if found, otherwise empty
+     */
     @Override
     public Optional<Spell> findById(Long id) {
         if (id == null) {
@@ -67,6 +82,11 @@ public class SpellRepositoryImpl implements SpellRepository {
         return Optional.empty();
     }
 
+    /**
+     * Saves a new spell to the database.
+     *
+     * @param spell the spell to save
+     */
     @Override
     public void save(Spell spell) {
         if (spell == null) {
@@ -100,6 +120,11 @@ public class SpellRepositoryImpl implements SpellRepository {
         }
     }
 
+    /**
+     * Updates an existing spell in the database.
+     *
+     * @param spell the spell to update
+     */
     @Override
     public void update(Spell spell) {
         if (spell == null) {
@@ -124,6 +149,11 @@ public class SpellRepositoryImpl implements SpellRepository {
         }
     }
 
+    /**
+     * Deletes a spell by its ID from the database.
+     *
+     * @param id the ID of the spell to delete
+     */
     @Override
     public void deleteById(Long id) {
         if (id == null) {
@@ -147,6 +177,13 @@ public class SpellRepositoryImpl implements SpellRepository {
         }
     }
 
+    /**
+     * Fetches spells by caster class and spell circle from the database.
+     *
+     * @param casterClass the caster class to filter by
+     * @param circle the spell circle to filter by
+     * @return a list of spells that match the specified caster class and spell circle
+     */
     @Override
     public List<Spell> findByCasterClassAndCircle(CasterClass casterClass, SpellCircle circle) {
         if (casterClass == null || circle == null) {
@@ -174,6 +211,12 @@ public class SpellRepositoryImpl implements SpellRepository {
         return spells;
     }
 
+    /**
+     * Fetches a spell by its name from the database.
+     *
+     * @param name the name of the spell to fetch
+     * @return an Optional containing the spell if found, otherwise empty
+     */
     @Override
     public Optional<Spell> findByName(String name) {
         if (name == null) {
@@ -200,6 +243,12 @@ public class SpellRepositoryImpl implements SpellRepository {
         return Optional.empty();
     }
 
+    /**
+     * Fetches characters by a spell name from the database.
+     *
+     * @param spellName the name of the spell to filter by
+     * @return a list of characters who have the specified spell
+     */
     @Override
     public List<Character> findCharactersBySpellName(String spellName) {
         if (spellName == null) {

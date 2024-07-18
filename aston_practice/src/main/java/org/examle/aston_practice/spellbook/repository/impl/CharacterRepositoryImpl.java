@@ -15,10 +15,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the CharacterRepository interface that provides CRUD operations
+ * for Character entities using a relational database.
+ */
 public class CharacterRepositoryImpl implements CharacterRepository {
 
     private static final Logger logger = LoggerFactory.getLogger(CharacterRepositoryImpl.class);
 
+    /**
+     * Fetches all characters from the database.
+     *
+     * @return a list of all characters
+     */
     @Override
     public List<Character> findAll() {
         logger.info("Fetching all characters from the database");
@@ -38,6 +47,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return characters;
     }
 
+    /**
+     * Fetches a character by its ID from the database.
+     *
+     * @param id the ID of the character to fetch
+     * @return an Optional containing the character if found, otherwise empty
+     */
     @Override
     public Optional<Character> findById(Long id) {
         logger.info("Fetching character by ID: {}", id);
@@ -60,6 +75,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return Optional.empty();
     }
 
+    /**
+     * Fetches a character by its name from the database.
+     *
+     * @param name the name of the character to fetch
+     * @return an Optional containing the character if found, otherwise empty
+     */
     @Override
     public Optional<Character> findByName(String name) {
         logger.info("Fetching character by name: {}", name);
@@ -82,6 +103,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return Optional.empty();
     }
 
+    /**
+     * Saves a new character to the database.
+     *
+     * @param character the character to save
+     */
     @Override
     public void save(Character character) {
         if (character == null) {
@@ -113,6 +139,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Updates an existing character in the database.
+     *
+     * @param character the character to update
+     */
     @Override
     public void update(Character character) {
         if (character == null) {
@@ -135,6 +166,11 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Deletes a character by its ID from the database.
+     *
+     * @param id the ID of the character to delete
+     */
     @Override
     public void deleteById(Long id) {
         if (id == null) {
@@ -154,6 +190,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Fetches characters by their caster class from the database.
+     *
+     * @param casterClass the caster class to filter by
+     * @return a list of characters with the specified caster class
+     */
     @Override
     public List<Character> findByCasterClass(CasterClass casterClass) {
         if (casterClass == null) {
@@ -179,6 +221,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return characters;
     }
 
+    /**
+     * Adds a spell to a character's spell list in the database.
+     *
+     * @param characterId the ID of the character
+     * @param spellId     the ID of the spell
+     */
     @Override
     public void addSpellToCharacter(Long characterId, Long spellId) {
         if (characterId == null || spellId == null) {
@@ -199,6 +247,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Fetches characters by a spell name from the database.
+     *
+     * @param spellName the name of the spell to filter by
+     * @return a list of characters who have the specified spell
+     */
     @Override
     public List<Character> findCharactersBySpellName(String spellName) {
         if (spellName == null) {
@@ -227,6 +281,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return characters;
     }
 
+    /**
+     * Fetches spells by a character name from the database.
+     *
+     * @param name the name of the character to filter by
+     * @return a list of spells that the character has
+     */
     @Override
     public List<Spell> findSpellsByCharacterName(String name) {
         if (name == null) {
@@ -255,6 +315,13 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return spells;
     }
 
+    /**
+     * Fetches spells by caster class and spell circle from the database.
+     *
+     * @param casterClass the caster class to filter by
+     * @param spellCircle the spell circle to filter by
+     * @return a list of spells that match the specified caster class and spell circle
+     */
     @Override
     public List<Spell> findSpellsByCasterClassAndSpellCircle(CasterClass casterClass, SpellCircle spellCircle) {
         if (casterClass == null || spellCircle == null) {
@@ -283,6 +350,12 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return spells;
     }
 
+    /**
+     * Adds a new spell to a character's spell list in the database.
+     *
+     * @param characterId the ID of the character
+     * @param spell       the spell to add
+     */
     @Override
     public void addNewSpellToCharacter(Long characterId, Spell spell) {
         if (characterId == null || spell == null) {
@@ -316,6 +389,13 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         }
     }
 
+    /**
+     * Maps a ResultSet to a Character object.
+     *
+     * @param resultSet the ResultSet to map
+     * @return the mapped Character object
+     * @throws SQLException if a database access error occurs
+     */
     private Character mapResultSetToCharacter(ResultSet resultSet) throws SQLException {
         Character character = new Character();
         character.setId(resultSet.getLong("id"));
@@ -325,6 +405,13 @@ public class CharacterRepositoryImpl implements CharacterRepository {
         return character;
     }
 
+    /**
+     * Maps a ResultSet to a Spell object.
+     *
+     * @param resultSet the ResultSet to map
+     * @return the mapped Spell object
+     * @throws SQLException if a database access error occurs
+     */
     private Spell mapResultSetToSpell(ResultSet resultSet) throws SQLException {
         Spell spell = new Spell();
         spell.setId(resultSet.getLong("id"));
