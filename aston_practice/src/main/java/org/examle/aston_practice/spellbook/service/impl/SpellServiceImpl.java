@@ -112,4 +112,16 @@ public class SpellServiceImpl implements SpellService {
         logger.info("Checking if spell with name {} exists", spellName);
         return spellRepository.findByName(spellName).isPresent();
     }
+
+    @Override
+    public SpellDTO findSpellByName(String spellName) throws SpellNotFoundException {
+        logger.info("Fetching spell by name: {}", spellName);
+        Optional<Spell> spell = spellRepository.findByName(spellName);
+        if (spell.isPresent()) {
+            return spellMapper.toDto(spell.get());
+        } else {
+            logger.error("Spell with name {} not found", spellName);
+            throw new SpellNotFoundException("Spell with name " + spellName + " not found");
+        }
+    }
 }

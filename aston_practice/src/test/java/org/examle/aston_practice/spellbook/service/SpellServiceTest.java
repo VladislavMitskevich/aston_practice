@@ -14,7 +14,6 @@ import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
-import org.examle.aston_practice.spellbook.exception.InvalidInputException;
 import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
 import org.examle.aston_practice.spellbook.repository.SpellRepository;
@@ -174,5 +173,22 @@ public class SpellServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
+    }
+
+    @Test
+    public void testFindSpellByName() {
+        when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
+        when(spellMapper.toDto(spell)).thenReturn(spellDTO);
+
+        SpellDTO result = spellServiceImpl.findSpellByName("Fireball");
+
+        assertEquals(spellDTO, result);
+    }
+
+    @Test
+    public void testFindSpellByNameNotFound() {
+        when(spellRepository.findByName("Fireball")).thenReturn(Optional.empty());
+
+        assertThrows(SpellNotFoundException.class, () -> spellServiceImpl.findSpellByName("Fireball"));
     }
 }

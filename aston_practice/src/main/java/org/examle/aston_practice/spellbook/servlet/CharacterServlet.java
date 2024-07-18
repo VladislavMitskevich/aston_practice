@@ -83,14 +83,9 @@ public class CharacterServlet extends HttpServlet {
                     resp.getWriter().write(objectMapper.writeValueAsString(spells));
                 } else {
                     logger.info("Fetching character by name: {}", characterNameParam);
-                    Optional<CharacterDTO> character = characterService.getCharacterByName(characterNameParam);
-                    if (character.isPresent()) {
-                        resp.setContentType("application/json");
-                        resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
-                    } else {
-                        resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        resp.getWriter().write("Character not found");
-                    }
+                    CharacterDTO character = characterService.getCharacterByName(characterNameParam);
+                    resp.setContentType("application/json");
+                    resp.getWriter().write(objectMapper.writeValueAsString(character));
                 }
             } else if (spellNameParam != null) {
                 logger.info("Fetching characters by spell name: {}", spellNameParam);

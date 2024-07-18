@@ -98,6 +98,16 @@ public class CharacterServiceTest {
         assertEquals(characterDTO, result.get());
     }
 
+    @Test
+    public void testGetCharacterByName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+        when(characterMapper.toDto(character)).thenReturn(characterDTO);
+
+        CharacterDTO result = characterServiceImpl.getCharacterByName("Gandalf");
+
+        assertEquals(characterDTO, result);
+    }
+
     @ParameterizedTest
     @EnumSource(CasterClass.class)
     public void testGetCharactersByCasterClass(CasterClass casterClass) {
@@ -141,17 +151,6 @@ public class CharacterServiceTest {
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
-    }
-
-    @Test
-    public void testGetCharacterByName() {
-        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
-        when(characterMapper.toDto(character)).thenReturn(characterDTO);
-
-        Optional<CharacterDTO> result = characterServiceImpl.getCharacterByName("Gandalf");
-
-        assertTrue(result.isPresent());
-        assertEquals(characterDTO, result.get());
     }
 
     @Test

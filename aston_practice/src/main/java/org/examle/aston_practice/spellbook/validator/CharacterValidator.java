@@ -29,7 +29,8 @@ public class CharacterValidator {
         }
 
         // New validation for existing character
-        if (characterService.existsByCharacterName(characterDTO.getName())) {
+        CharacterDTO existingCharacter = characterService.getCharacterByName(characterDTO.getName());
+        if (existingCharacter != null && !existingCharacter.getId().equals(characterDTO.getId())) {
             logger.error("Character with name {} already exists", characterDTO.getName());
             throw new InvalidInputException("Character with name " + characterDTO.getName() + " already exists");
         }

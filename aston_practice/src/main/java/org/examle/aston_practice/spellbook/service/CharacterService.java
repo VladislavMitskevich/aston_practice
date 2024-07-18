@@ -29,10 +29,10 @@ public interface CharacterService {
     /**
      * Retrieves a character by its name.
      * @param characterName the name of the character to retrieve, cannot be null
-     * @return an Optional containing the character as a DTO if found, or an empty Optional if not found
+     * @return the character as a DTO if found, or null if not found
      * @throws IllegalArgumentException if the characterName is null
      */
-    Optional<CharacterDTO> getCharacterByName(String characterName);
+    CharacterDTO getCharacterByName(String characterName);
 
     /**
      * Creates a new character if a character with the same name does not already exist.

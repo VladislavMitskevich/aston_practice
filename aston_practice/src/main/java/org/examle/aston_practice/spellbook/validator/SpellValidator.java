@@ -2,6 +2,7 @@ package org.examle.aston_practice.spellbook.validator;
 
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.exception.InvalidInputException;
+import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
 import org.examle.aston_practice.spellbook.service.SpellService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,10 +33,16 @@ public class SpellValidator {
             throw new InvalidInputException("Spell description is required");
         }
 
-        // New validation for existing spell
-        if (spellService.existsBySpellName(spellDTO.getName())) {
-            logger.error("Spell with name {} already exists", spellDTO.getName());
-            throw new InvalidInputException("Spell with name " + spellDTO.getName() + " already exists");
+        // Проверка на существование заклинания с таким именем
+        try {
+            SpellDTO existingSpell = spellService.findSpellByName(spellDTO.getName());
+            // Если заклинание существует, проверяем, совпадают ли все поля
+            if (!existingSpell.getId().equals(spellDTO.getId())) {
+                logger.error("Spell with name {} already exists with different details", spellDTO.getName());
+                throw new InvalidInputException("Spell with name " + spellDTO.getName() + " already exists with different details");
+            }
+        } catch (SpellNotFoundException e) {
+            // Если заклинание не найдено, то валидация проходит успешно
         }
     }
 }

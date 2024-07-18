@@ -131,12 +131,15 @@ public class SpellRepositoryImpl implements SpellRepository {
             throw new IllegalArgumentException("Spell ID cannot be null");
         }
         logger.info("Deleting spell by ID: {}", id);
+
+        // Удаляем связанные записи в таблице spell_caster_classes
+        deleteCasterClassesForSpell(id);
+
         String sql = "DELETE FROM spells WHERE id = ?";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             statement.executeUpdate();
-            deleteCasterClassesForSpell(id);
             logger.info("Spell with ID {} deleted", id);
         } catch (SQLException e) {
             logger.error("Failed to delete spell with id {}", id, e);

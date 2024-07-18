@@ -4,6 +4,7 @@ import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -77,4 +78,13 @@ public interface SpellService {
      * @throws IllegalArgumentException if the spellName is null
      */
     boolean existsBySpellName(String spellName);
+
+    /**
+     * Retrieves a spell by its name.
+     * @param spellName the name of the spell to retrieve, cannot be null
+     * @return the spell as a DTO
+     * @throws SpellNotFoundException if the spell with the given name is not found
+     * @throws IllegalArgumentException if the spellName is null
+     */
+    SpellDTO findSpellByName(String spellName) throws SpellNotFoundException;
 }

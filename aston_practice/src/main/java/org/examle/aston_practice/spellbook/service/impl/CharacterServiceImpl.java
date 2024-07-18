@@ -53,10 +53,14 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public Optional<CharacterDTO> getCharacterByName(String characterName) {
+    public CharacterDTO getCharacterByName(String characterName) {
         logger.info("Fetching character by name: {}", characterName);
-        return characterRepository.findByName(characterName)
-                .map(characterMapper::toDto);
+        Optional<Character> characterOptional = characterRepository.findByName(characterName);
+        if (characterOptional.isPresent()) {
+            return characterMapper.toDto(characterOptional.get());
+        } else {
+            throw new CharacterNotFoundException("Character with name " + characterName + " not found");
+        }
     }
 
     @Override
