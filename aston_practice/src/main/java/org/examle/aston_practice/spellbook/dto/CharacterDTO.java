@@ -8,7 +8,6 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Data Transfer Object for Character.
@@ -41,27 +40,6 @@ public class CharacterDTO {
      * Map of spells available to the character by circle.
      */
     private Map<SpellCircle, List<SpellDTO>> spellsByCircle;
-
-    /**
-     * Returns a list of all spells available to the character.
-     * @return list of all spells
-     */
-    public List<SpellDTO> getAllSpells() {
-        if (spellsByCircle == null) {
-            return java.util.Collections.emptyList();
-        }
-        return spellsByCircle.values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Sets the spells available to the character.
-     * @param spellsByCircle the map of spells by circle
-     */
-    public void setSpells(Map<SpellCircle, List<SpellDTO>> spellsByCircle) {
-        this.spellsByCircle = spellsByCircle;
-    }
 
     /**
      * Returns a string representation of the character.

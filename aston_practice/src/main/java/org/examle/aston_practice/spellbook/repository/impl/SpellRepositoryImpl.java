@@ -88,6 +88,7 @@ public class SpellRepositoryImpl implements SpellRepository {
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     spell.setId(generatedKeys.getLong(1));
+                    saveCasterClassesForSpell(spell.getId(), spell.getCasterClasses());
                     logger.info("Spell saved with ID: {}", spell.getId());
                 } else {
                     throw new SQLException("Creating spell failed, no ID obtained.");
@@ -115,6 +116,7 @@ public class SpellRepositoryImpl implements SpellRepository {
             statement.setString(4, spell.getDescription());
             statement.setLong(5, spell.getId());
             statement.executeUpdate();
+            updateCasterClassesForSpell(spell.getId(), spell.getCasterClasses());
             logger.info("Spell with ID {} updated", spell.getId());
         } catch (SQLException e) {
             logger.error("Failed to update spell with id {}", spell.getId(), e);
@@ -134,6 +136,7 @@ public class SpellRepositoryImpl implements SpellRepository {
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             statement.executeUpdate();
+            deleteCasterClassesForSpell(id);
             logger.info("Spell with ID {} deleted", id);
         } catch (SQLException e) {
             logger.error("Failed to delete spell with id {}", id, e);
@@ -264,6 +267,59 @@ public class SpellRepositoryImpl implements SpellRepository {
             throw new RuntimeException("Failed to retrieve caster classes for spell with id " + spellId, e);
         }
         return casterClasses;
+    }
+
+    /**
+     * Saves the caster classes for a given spell ID.
+     *
+     * @param spellId The ID of the spell for which to save the caster classes.
+     * @param casterClasses The Set of CasterClass values to save.
+     * @throws RuntimeException if an error occurs while saving the caster classes.
+     */
+    private void saveCasterClassesForSpell(Long spellId, Set<CasterClass> casterClasses) {
+        String sql = "INSERT INTO spell_caster_classes (spell_id, caster_class) VALUES (?, ?)";
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            for (CasterClass casterClass : casterClasses) {
+                statement.setLong(1, spellId);
+                statement.setString(2, casterClass.name());
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        } catch (SQLException e) {
+            logger.error("Failed to save caster classes for spell with id {}", spellId, e);
+            throw new RuntimeException("Failed to save caster classes for spell with id " + spellId, e);
+        }
+    }
+
+    /**
+     * Updates the caster classes for a given spell ID.
+     *
+     * @param spellId The ID of the spell for which to update the caster classes.
+     * @param casterClasses The Set of CasterClass values to update.
+     * @throws RuntimeException if an error occurs while updating the caster classes.
+     */
+    private void updateCasterClassesForSpell(Long spellId, Set<CasterClass> casterClasses) {
+        deleteCasterClassesForSpell(spellId);
+        saveCasterClassesForSpell(spellId, casterClasses);
+    }
+
+    /**
+     * Deletes the caster classes for a given spell ID.
+     *
+     * @param spellId The ID of the spell for which to delete the caster classes.
+     * @throws RuntimeException if an error occurs while deleting the caster classes.
+     */
+    private void deleteCasterClassesForSpell(Long spellId) {
+        String sql = "DELETE FROM spell_caster_classes WHERE spell_id = ?";
+        try (Connection connection = DatabaseUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, spellId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            logger.error("Failed to delete caster classes for spell with id {}", spellId, e);
+            throw new RuntimeException("Failed to delete caster classes for spell with id " + spellId, e);
+        }
     }
 
     /**

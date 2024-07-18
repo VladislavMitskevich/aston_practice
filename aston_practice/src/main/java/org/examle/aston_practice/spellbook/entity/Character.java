@@ -8,7 +8,6 @@ import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Entity representing a Character.
@@ -41,27 +40,6 @@ public class Character {
      * Map of spells available to the character by circle.
      */
     private Map<SpellCircle, List<Spell>> spellsByCircle;
-
-    /**
-     * Returns a list of all spells available to the character.
-     * @return list of all spells
-     */
-    public List<Spell> getSpells() {
-        if (spellsByCircle == null) {
-            return java.util.Collections.emptyList();
-        }
-        return spellsByCircle.values().stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Sets the spells available to the character.
-     * @param spellsByCircle the map of spells by circle
-     */
-    public void setSpells(Map<SpellCircle, List<Spell>> spellsByCircle) {
-        this.spellsByCircle = spellsByCircle;
-    }
 
     /**
      * Returns a string representation of the character.

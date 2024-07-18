@@ -47,7 +47,7 @@ public class SpellMapper {
                                 .map(this::toDto)
                                 .collect(Collectors.toList())
                 ));
-        characterDTO.setSpells(spellsByCircleDTO);
+        characterDTO.setSpellsByCircle(spellsByCircleDTO);
         return characterDTO;
     }
 
@@ -64,7 +64,7 @@ public class SpellMapper {
                                 .map(this::toEntity)
                                 .collect(Collectors.toList())
                 ));
-        character.setSpells(spellsByCircle);
+        character.setSpellsByCircle(spellsByCircle);
         return character;
     }
 }

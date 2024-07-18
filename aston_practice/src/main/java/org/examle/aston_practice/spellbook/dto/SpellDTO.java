@@ -48,7 +48,7 @@ public class SpellDTO {
     private String description;
 
     /**
-     * List of characters that have this spell.
+     * List of characters that can cast this spell.
      */
     private List<CharacterDTO> characters;
 
@@ -65,7 +65,7 @@ public class SpellDTO {
                 ", circle=" + circle +
                 ", casterClasses=" + casterClasses +
                 ", description='" + description + '\'' +
-                ", characters=" + (characters != null ? characters : "null") +
+                ", characters=" + characters +
                 '}';
     }
 
