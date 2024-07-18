@@ -23,17 +23,17 @@ public class SpellDTO {
     private Long id;
 
     /**
-     * Name of the spell.
+     * Name of the spell. Must be unique.
      */
     private String name;
 
     /**
-     * School of magic to which the spell belongs.
+     * School of magic to which the spell belongs. Determines the type of magic the spell uses.
      */
     private SchoolOfMagic school;
 
     /**
-     * Circle of the spell.
+     * Circle of the spell. Determines the level of complexity and power of the spell.
      */
     private SpellCircle circle;
 
@@ -43,7 +43,7 @@ public class SpellDTO {
     private Set<CasterClass> casterClasses;
 
     /**
-     * Description of the spell.
+     * Description of the spell. Provides details about what the spell does.
      */
     private String description;
 

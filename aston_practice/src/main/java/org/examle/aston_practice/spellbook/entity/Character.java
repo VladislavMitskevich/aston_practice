@@ -22,22 +22,23 @@ public class Character {
     private Long id;
 
     /**
-     * Name of the character.
+     * Name of the character. Must be unique.
      */
     private String name;
 
     /**
-     * Caster class of the character.
+     * Caster class of the character. Determines the type of magic the character can use.
      */
     private CasterClass casterClass;
 
     /**
-     * Level of the character.
+     * Level of the character. Must be between 1 and 20.
      */
     private int level;
 
     /**
      * Map of spells available to the character by circle.
+     * Each entry represents a spell circle and the list of spells available at that circle.
      */
     private Map<SpellCircle, List<Spell>> spellsByCircle;
 

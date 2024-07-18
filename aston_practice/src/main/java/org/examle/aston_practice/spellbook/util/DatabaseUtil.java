@@ -3,7 +3,6 @@ package org.examle.aston_practice.spellbook.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -21,6 +20,7 @@ public class DatabaseUtil {
     private static final Properties properties = new Properties();
 
     static {
+        // Load database properties and initialize JDBC driver
         try (InputStream input = DatabaseUtil.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE)) {
             if (input == null) {
                 logger.error("Sorry, unable to find " + PROPERTIES_FILE);

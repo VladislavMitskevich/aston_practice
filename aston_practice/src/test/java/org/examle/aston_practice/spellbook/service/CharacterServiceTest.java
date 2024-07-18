@@ -15,7 +15,9 @@ import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.repository.CharacterRepository;
+import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
+import org.examle.aston_practice.spellbook.validator.CharacterValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +34,16 @@ public class CharacterServiceTest {
     private CharacterRepository characterRepository;
 
     @Mock
+    private SpellRepository spellRepository;
+
+    @Mock
     private CharacterMapper characterMapper;
 
+    @Mock
+    private CharacterValidator characterValidator;
+
     @InjectMocks
-    private CharacterServiceImpl characterService;
+    private CharacterServiceImpl characterServiceImpl;
 
     private CharacterDTO characterDTO;
     private SpellDTO spellDTO;
@@ -71,8 +79,10 @@ public class CharacterServiceTest {
     public void testCreateCharacter() {
         when(characterMapper.toEntity(characterDTO)).thenReturn(character);
         doNothing().when(characterRepository).save(character);
+        doNothing().when(characterValidator).validate(characterDTO);
+        when(characterRepository.findByName(characterDTO.getName())).thenReturn(Optional.empty());
 
-        characterService.createCharacter(characterDTO);
+        characterServiceImpl.createCharacter(characterDTO);
 
         verify(characterRepository, times(1)).save(character);
     }
@@ -82,7 +92,7 @@ public class CharacterServiceTest {
         when(characterRepository.findById(1L)).thenReturn(Optional.of(character));
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        Optional<CharacterDTO> result = characterService.getCharacterById(1L);
+        Optional<CharacterDTO> result = characterServiceImpl.getCharacterById(1L);
 
         assertTrue(result.isPresent());
         assertEquals(characterDTO, result.get());
@@ -95,7 +105,7 @@ public class CharacterServiceTest {
         when(characterRepository.findByCasterClass(casterClass)).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = characterService.getCharactersByCasterClass(casterClass);
+        List<CharacterDTO> result = characterServiceImpl.getCharactersByCasterClass(casterClass);
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
@@ -105,8 +115,9 @@ public class CharacterServiceTest {
     public void testUpdateCharacter() {
         when(characterMapper.toEntity(characterDTO)).thenReturn(character);
         doNothing().when(characterRepository).update(character);
+        doNothing().when(characterValidator).validate(characterDTO);
 
-        characterService.updateCharacter(characterDTO);
+        characterServiceImpl.updateCharacter(characterDTO);
 
         verify(characterRepository, times(1)).update(character);
     }
@@ -115,7 +126,7 @@ public class CharacterServiceTest {
     public void testDeleteCharacter() {
         doNothing().when(characterRepository).deleteById(1L);
 
-        characterService.deleteCharacter(1L);
+        characterServiceImpl.deleteCharacter(1L);
 
         verify(characterRepository, times(1)).deleteById(1L);
     }
@@ -126,7 +137,7 @@ public class CharacterServiceTest {
         when(characterRepository.findAll()).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = characterService.getAllCharacters();
+        List<CharacterDTO> result = characterServiceImpl.getAllCharacters();
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
@@ -137,7 +148,7 @@ public class CharacterServiceTest {
         when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        Optional<CharacterDTO> result = characterService.getCharacterByName("Gandalf");
+        Optional<CharacterDTO> result = characterServiceImpl.getCharacterByName("Gandalf");
 
         assertTrue(result.isPresent());
         assertEquals(characterDTO, result.get());
@@ -149,7 +160,7 @@ public class CharacterServiceTest {
         when(characterRepository.findCharactersBySpellName("Fireball")).thenReturn(characters);
         when(characterMapper.toDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = characterService.getCharactersBySpellName("Fireball");
+        List<CharacterDTO> result = characterServiceImpl.getCharactersBySpellName("Fireball");
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
@@ -161,7 +172,7 @@ public class CharacterServiceTest {
         when(characterRepository.findSpellsByCharacterName("Gandalf")).thenReturn(spells);
         when(characterMapper.convertSpellToDto(spell)).thenReturn(spellDTO);
 
-        List<SpellDTO> result = characterService.getSpellsByCharacterName("Gandalf");
+        List<SpellDTO> result = characterServiceImpl.getSpellsByCharacterName("Gandalf");
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
@@ -174,7 +185,7 @@ public class CharacterServiceTest {
         when(characterRepository.findSpellsByCasterClassAndSpellCircle(casterClass, SpellCircle.THIRD)).thenReturn(spells);
         when(characterMapper.convertSpellToDto(spell)).thenReturn(spellDTO);
 
-        List<SpellDTO> result = characterService.getSpellsByCasterClassAndSpellCircle(casterClass, SpellCircle.THIRD);
+        List<SpellDTO> result = characterServiceImpl.getSpellsByCasterClassAndSpellCircle(casterClass, SpellCircle.THIRD);
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
@@ -185,9 +196,37 @@ public class CharacterServiceTest {
         when(characterMapper.convertDtoToSpell(spellDTO)).thenReturn(spell);
         doNothing().when(characterRepository).addNewSpellToCharacter(1L, spell);
 
-        characterService.addNewSpellToCharacter(1L, spellDTO);
+        characterServiceImpl.addNewSpellToCharacter(1L, spellDTO);
 
         verify(characterRepository, times(1)).addNewSpellToCharacter(1L, spell);
     }
-}
 
+    @Test
+    public void testAddSpellToCharacterByName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+        when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
+        doNothing().when(characterRepository).addSpellToCharacter(character.getId(), spell.getId());
+
+        characterServiceImpl.addSpellToCharacterByName("Gandalf", "Fireball");
+
+        verify(characterRepository, times(1)).addSpellToCharacter(character.getId(), spell.getId());
+    }
+
+    @Test
+    public void testExistsByCharacterName() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.of(character));
+
+        boolean result = characterServiceImpl.existsByCharacterName("Gandalf");
+
+        assertTrue(result);
+    }
+
+    @Test
+    public void testExistsByCharacterName_NotFound() {
+        when(characterRepository.findByName("Gandalf")).thenReturn(Optional.empty());
+
+        boolean result = characterServiceImpl.existsByCharacterName("Gandalf");
+
+        assertFalse(result);
+    }
+}

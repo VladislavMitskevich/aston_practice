@@ -10,8 +10,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Mapper class for converting between Spell entity and SpellDTO.
+ */
 public class SpellMapper {
 
+    /**
+     * Converts a Spell entity to a SpellDTO.
+     *
+     * @param spell the Spell entity to convert
+     * @return the corresponding SpellDTO
+     */
     public SpellDTO toDto(Spell spell) {
         SpellDTO spellDTO = new SpellDTO();
         spellDTO.setId(spell.getId());
@@ -23,6 +32,12 @@ public class SpellMapper {
         return spellDTO;
     }
 
+    /**
+     * Converts a SpellDTO to a Spell entity.
+     *
+     * @param spellDTO the SpellDTO to convert
+     * @return the corresponding Spell entity
+     */
     public Spell toEntity(SpellDTO spellDTO) {
         Spell spell = new Spell();
         spell.setId(spellDTO.getId());
@@ -34,6 +49,12 @@ public class SpellMapper {
         return spell;
     }
 
+    /**
+     * Converts a Character entity to a CharacterDTO.
+     *
+     * @param character the Character entity to convert
+     * @return the corresponding CharacterDTO
+     */
     public CharacterDTO characterToDto(Character character) {
         CharacterDTO characterDTO = new CharacterDTO();
         characterDTO.setId(character.getId());
@@ -51,6 +72,12 @@ public class SpellMapper {
         return characterDTO;
     }
 
+    /**
+     * Converts a CharacterDTO to a Character entity.
+     *
+     * @param characterDTO the CharacterDTO to convert
+     * @return the corresponding Character entity
+     */
     public Character dtoToCharacter(CharacterDTO characterDTO) {
         Character character = new Character();
         character.setId(characterDTO.getId());

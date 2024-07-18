@@ -11,6 +11,7 @@ import org.examle.aston_practice.spellbook.service.SpellService;
 import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.SpellRepositoryImpl;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
+import org.examle.aston_practice.spellbook.validator.SpellValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,9 @@ public class SpellServlet extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        spellService = new SpellServiceImpl(new SpellRepositoryImpl(), new SpellMapper());
+        SpellMapper spellMapper = new SpellMapper();
+        SpellValidator spellValidator = new SpellValidator(new SpellServiceImpl(new SpellRepositoryImpl(), spellMapper, new SpellValidator(null)));
+        spellService = new SpellServiceImpl(new SpellRepositoryImpl(), spellMapper, spellValidator);
         objectMapper = new ObjectMapper();
         logger.info("SpellServlet initialized");
     }

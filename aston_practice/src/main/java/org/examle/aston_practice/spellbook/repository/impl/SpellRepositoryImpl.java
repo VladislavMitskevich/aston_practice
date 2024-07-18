@@ -277,6 +277,11 @@ public class SpellRepositoryImpl implements SpellRepository {
      * @throws RuntimeException if an error occurs while saving the caster classes.
      */
     private void saveCasterClassesForSpell(Long spellId, Set<CasterClass> casterClasses) {
+        if (casterClasses == null) {
+            logger.warn("Caster classes are null for spell with id {}", spellId);
+            return;
+        }
+
         String sql = "INSERT INTO spell_caster_classes (spell_id, caster_class) VALUES (?, ?)";
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -300,6 +305,12 @@ public class SpellRepositoryImpl implements SpellRepository {
      * @throws RuntimeException if an error occurs while updating the caster classes.
      */
     private void updateCasterClassesForSpell(Long spellId, Set<CasterClass> casterClasses) {
+        if (casterClasses == null) {
+            logger.warn("Caster classes are null for spell with id {}", spellId);
+            deleteCasterClassesForSpell(spellId);
+            return;
+        }
+
         deleteCasterClassesForSpell(spellId);
         saveCasterClassesForSpell(spellId, casterClasses);
     }

@@ -6,10 +6,12 @@ import org.examle.aston_practice.spellbook.entity.Character;
 import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.repository.CharacterRepository;
+import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
 import org.examle.aston_practice.spellbook.exception.CharacterNotFoundException;
+import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
 import org.examle.aston_practice.spellbook.validator.CharacterValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,18 +20,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementation of CharacterService interface.
- */
 public class CharacterServiceImpl implements CharacterService {
 
     private final CharacterRepository characterRepository;
+    private final SpellRepository spellRepository;
     private final CharacterMapper characterMapper;
+    private final CharacterValidator characterValidator;
     private static final Logger logger = LoggerFactory.getLogger(CharacterServiceImpl.class);
 
-    public CharacterServiceImpl(CharacterRepository characterRepository, CharacterMapper characterMapper) {
+    public CharacterServiceImpl(CharacterRepository characterRepository, SpellRepository spellRepository, CharacterMapper characterMapper, CharacterValidator characterValidator) {
         this.characterRepository = characterRepository;
+        this.spellRepository = spellRepository;
         this.characterMapper = characterMapper;
+        this.characterValidator = characterValidator;
         logger.info("CharacterServiceImpl initialized");
     }
 
@@ -50,16 +53,19 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public Optional<CharacterDTO> getCharacterByName(String name) {
-        logger.info("Fetching character by name: {}", name);
-        return characterRepository.findByName(name)
+    public Optional<CharacterDTO> getCharacterByName(String characterName) {
+        logger.info("Fetching character by name: {}", characterName);
+        return characterRepository.findByName(characterName)
                 .map(characterMapper::toDto);
     }
 
     @Override
     public void createCharacter(CharacterDTO characterDTO) {
         logger.info("Creating character: {}", characterDTO);
-        CharacterValidator.validate(characterDTO);
+        characterValidator.validate(characterDTO);
+        if (existsByCharacterName(characterDTO.getName())) {
+            throw new IllegalArgumentException("Character with name " + characterDTO.getName() + " already exists");
+        }
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.save(character);
     }
@@ -67,7 +73,7 @@ public class CharacterServiceImpl implements CharacterService {
     @Override
     public void updateCharacter(CharacterDTO characterDTO) {
         logger.info("Updating character: {}", characterDTO);
-        CharacterValidator.validate(characterDTO);
+        characterValidator.validate(characterDTO);
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.update(character);
     }
@@ -88,9 +94,19 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public void addSpellToCharacter(Long characterId, Long spellId) {
-        logger.info("Adding spell with ID {} to character with ID {}", spellId, characterId);
-        characterRepository.addSpellToCharacter(characterId, spellId);
+    public void addSpellToCharacterByName(String characterName, String spellName) {
+        logger.info("Adding spell with name {} to character with name {}", spellName, characterName);
+        Optional<Character> characterOptional = characterRepository.findByName(characterName);
+        Optional<Spell> spellOptional = spellRepository.findByName(spellName);
+
+        if (!characterOptional.isPresent()) {
+            throw new CharacterNotFoundException("Character with name " + characterName + " not found");
+        }
+        if (!spellOptional.isPresent()) {
+            throw new SpellNotFoundException("Spell with name " + spellName + " not found");
+        }
+
+        characterRepository.addSpellToCharacter(characterOptional.get().getId(), spellOptional.get().getId());
     }
 
     @Override
@@ -103,9 +119,9 @@ public class CharacterServiceImpl implements CharacterService {
     }
 
     @Override
-    public List<SpellDTO> getSpellsByCharacterName(String name) {
-        logger.info("Fetching spells by character name: {}", name);
-        return characterRepository.findSpellsByCharacterName(name)
+    public List<SpellDTO> getSpellsByCharacterName(String characterName) {
+        logger.info("Fetching spells by character name: {}", characterName);
+        return characterRepository.findSpellsByCharacterName(characterName)
                 .stream()
                 .map(characterMapper::convertSpellToDto)
                 .collect(Collectors.toList());
@@ -125,5 +141,11 @@ public class CharacterServiceImpl implements CharacterService {
         logger.info("Adding new spell to character with ID {}: {}", characterId, spellDTO);
         Spell spell = characterMapper.convertDtoToSpell(spellDTO);
         characterRepository.addNewSpellToCharacter(characterId, spell);
+    }
+
+    @Override
+    public boolean existsByCharacterName(String characterName) {
+        logger.info("Checking if character with name {} exists", characterName);
+        return characterRepository.findByName(characterName).isPresent();
     }
 }

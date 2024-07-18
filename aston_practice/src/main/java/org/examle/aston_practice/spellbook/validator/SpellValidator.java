@@ -2,13 +2,19 @@ package org.examle.aston_practice.spellbook.validator;
 
 import org.examle.aston_practice.spellbook.dto.SpellDTO;
 import org.examle.aston_practice.spellbook.exception.InvalidInputException;
+import org.examle.aston_practice.spellbook.service.SpellService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SpellValidator {
-    private static final Logger logger = LoggerFactory.getLogger(SpellValidator.class);
+    private final Logger logger = LoggerFactory.getLogger(SpellValidator.class);
+    private final SpellService spellService;
 
-    public static void validate(SpellDTO spellDTO) {
+    public SpellValidator(SpellService spellService) {
+        this.spellService = spellService;
+    }
+
+    public void validate(SpellDTO spellDTO) {
         if (spellDTO.getName() == null || spellDTO.getName().isEmpty()) {
             logger.error("Spell name is required. Received: {}", spellDTO.getName());
             throw new InvalidInputException("Spell name is required");
@@ -24,6 +30,12 @@ public class SpellValidator {
         if (spellDTO.getDescription() == null || spellDTO.getDescription().isEmpty()) {
             logger.error("Spell description is required. Received: {}", spellDTO.getDescription());
             throw new InvalidInputException("Spell description is required");
+        }
+
+        // New validation for existing spell
+        if (spellService.existsBySpellName(spellDTO.getName())) {
+            logger.error("Spell with name {} already exists", spellDTO.getName());
+            throw new InvalidInputException("Spell with name " + spellDTO.getName() + " already exists");
         }
     }
 }

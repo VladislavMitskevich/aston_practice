@@ -21,11 +21,13 @@ public class SpellServiceImpl implements SpellService {
 
     private final SpellRepository spellRepository;
     private final SpellMapper spellMapper;
+    private final SpellValidator spellValidator;
     private static final Logger logger = LoggerFactory.getLogger(SpellServiceImpl.class);
 
-    public SpellServiceImpl(SpellRepository spellRepository, SpellMapper spellMapper) {
+    public SpellServiceImpl(SpellRepository spellRepository, SpellMapper spellMapper, SpellValidator spellValidator) {
         this.spellRepository = spellRepository;
         this.spellMapper = spellMapper;
+        this.spellValidator = spellValidator;
         logger.info("SpellServiceImpl initialized");
     }
 
@@ -51,21 +53,24 @@ public class SpellServiceImpl implements SpellService {
     }
 
     @Override
-    public Optional<SpellDTO> getSpellByName(String name) {
-        logger.info("Fetching spell by name: {}", name);
-        Optional<Spell> spell = spellRepository.findByName(name);
+    public Optional<SpellDTO> getSpellByName(String spellName) {
+        logger.info("Fetching spell by name: {}", spellName);
+        Optional<Spell> spell = spellRepository.findByName(spellName);
         if (spell.isPresent()) {
             return Optional.of(spellMapper.toDto(spell.get()));
         } else {
-            logger.error("Spell with name {} not found", name);
-            throw new SpellNotFoundException("Spell with name " + name + " not found");
+            logger.error("Spell with name {} not found", spellName);
+            throw new SpellNotFoundException("Spell with name " + spellName + " not found");
         }
     }
 
     @Override
     public void createSpell(SpellDTO spellDTO) {
         logger.info("Creating spell: {}", spellDTO);
-        SpellValidator.validate(spellDTO);
+        spellValidator.validate(spellDTO);
+        if (existsBySpellName(spellDTO.getName())) {
+            throw new IllegalArgumentException("Spell with name " + spellDTO.getName() + " already exists");
+        }
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.save(spell);
     }
@@ -73,7 +78,7 @@ public class SpellServiceImpl implements SpellService {
     @Override
     public void updateSpell(SpellDTO spellDTO) {
         logger.info("Updating spell: {}", spellDTO);
-        SpellValidator.validate(spellDTO);
+        spellValidator.validate(spellDTO);
         Spell spell = spellMapper.toEntity(spellDTO);
         spellRepository.update(spell);
     }
@@ -100,5 +105,11 @@ public class SpellServiceImpl implements SpellService {
                 .stream()
                 .map(spellMapper::characterToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsBySpellName(String spellName) {
+        logger.info("Checking if spell with name {} exists", spellName);
+        return spellRepository.findByName(spellName).isPresent();
     }
 }

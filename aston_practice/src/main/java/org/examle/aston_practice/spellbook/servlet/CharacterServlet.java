@@ -10,8 +10,10 @@ import org.examle.aston_practice.spellbook.exception.InvalidInputException;
 import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.examle.aston_practice.spellbook.service.impl.CharacterServiceImpl;
 import org.examle.aston_practice.spellbook.repository.impl.CharacterRepositoryImpl;
+import org.examle.aston_practice.spellbook.repository.impl.SpellRepositoryImpl;
 import org.examle.aston_practice.spellbook.mapper.CharacterMapper;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
+import org.examle.aston_practice.spellbook.validator.CharacterValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +40,8 @@ public class CharacterServlet extends HttpServlet {
     public void init() throws ServletException {
         SpellMapper spellMapper = new SpellMapper();
         CharacterMapper characterMapper = new CharacterMapper(spellMapper);
-        characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), characterMapper);
+        CharacterValidator characterValidator = new CharacterValidator(new CharacterServiceImpl(new CharacterRepositoryImpl(), new SpellRepositoryImpl(), characterMapper, new CharacterValidator(null)));
+        characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), new SpellRepositoryImpl(), characterMapper, characterValidator);
         objectMapper = new ObjectMapper();
         logger.info("CharacterServlet initialized");
     }
@@ -49,7 +52,7 @@ public class CharacterServlet extends HttpServlet {
         try {
             String idParam = req.getParameter("id");
             String casterClassParam = req.getParameter("casterClass");
-            String nameParam = req.getParameter("name");
+            String characterNameParam = req.getParameter("characterName");
             String spellNameParam = req.getParameter("spellName");
             String casterClassForSpellsParam = req.getParameter("casterClassForSpells");
             String spellCircleParam = req.getParameter("spellCircle");
@@ -72,15 +75,15 @@ public class CharacterServlet extends HttpServlet {
                 List<CharacterDTO> characters = characterService.getCharactersByCasterClass(casterClass);
                 resp.setContentType("application/json");
                 resp.getWriter().write(objectMapper.writeValueAsString(characters));
-            } else if (nameParam != null) {
+            } else if (characterNameParam != null) {
                 if (Boolean.parseBoolean(includeSpellsParam)) {
-                    logger.info("Fetching spells by character name: {}", nameParam);
-                    List<SpellDTO> spells = characterService.getSpellsByCharacterName(nameParam);
+                    logger.info("Fetching spells by character name: {}", characterNameParam);
+                    List<SpellDTO> spells = characterService.getSpellsByCharacterName(characterNameParam);
                     resp.setContentType("application/json");
                     resp.getWriter().write(objectMapper.writeValueAsString(spells));
                 } else {
-                    logger.info("Fetching character by name: {}", nameParam);
-                    Optional<CharacterDTO> character = characterService.getCharacterByName(nameParam);
+                    logger.info("Fetching character by name: {}", characterNameParam);
+                    Optional<CharacterDTO> character = characterService.getCharacterByName(characterNameParam);
                     if (character.isPresent()) {
                         resp.setContentType("application/json");
                         resp.getWriter().write(objectMapper.writeValueAsString(character.get()));
@@ -126,12 +129,12 @@ public class CharacterServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         logger.info("doPost method called");
         try {
-            String characterIdParam = req.getParameter("characterId");
-            if (characterIdParam != null) {
-                logger.info("Adding new spell to character with ID: {}", characterIdParam);
-                Long characterId = Long.valueOf(characterIdParam);
-                SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
-                characterService.addNewSpellToCharacter(characterId, spellDTO);
+            String characterNameParam = req.getParameter("characterName");
+            String spellNameParam = req.getParameter("spellName");
+
+            if (characterNameParam != null && spellNameParam != null) {
+                logger.info("Adding spell with name: {} to character with name: {}", spellNameParam, characterNameParam);
+                characterService.addSpellToCharacterByName(characterNameParam, spellNameParam);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
             } else {
                 logger.info("Creating new character");
@@ -155,13 +158,11 @@ public class CharacterServlet extends HttpServlet {
         logger.info("doPut method called");
         try {
             String characterIdParam = req.getParameter("characterId");
-            String spellIdParam = req.getParameter("spellId");
-
-            if (characterIdParam != null && spellIdParam != null) {
-                logger.info("Adding existing spell with ID: {} to character with ID: {}", spellIdParam, characterIdParam);
+            if (characterIdParam != null) {
+                logger.info("Adding new spell to character with ID: {}", characterIdParam);
                 Long characterId = Long.valueOf(characterIdParam);
-                Long spellId = Long.valueOf(spellIdParam);
-                characterService.addSpellToCharacter(characterId, spellId);
+                SpellDTO spellDTO = objectMapper.readValue(req.getReader(), SpellDTO.class);
+                characterService.addNewSpellToCharacter(characterId, spellDTO);
                 resp.setStatus(HttpServletResponse.SC_OK);
             } else {
                 logger.info("Updating character");

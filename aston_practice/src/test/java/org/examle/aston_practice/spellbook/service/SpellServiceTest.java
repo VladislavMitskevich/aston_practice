@@ -14,10 +14,12 @@ import org.examle.aston_practice.spellbook.entity.Spell;
 import org.examle.aston_practice.spellbook.enums.CasterClass;
 import org.examle.aston_practice.spellbook.enums.SchoolOfMagic;
 import org.examle.aston_practice.spellbook.enums.SpellCircle;
+import org.examle.aston_practice.spellbook.exception.InvalidInputException;
 import org.examle.aston_practice.spellbook.exception.SpellNotFoundException;
 import org.examle.aston_practice.spellbook.mapper.SpellMapper;
 import org.examle.aston_practice.spellbook.repository.SpellRepository;
 import org.examle.aston_practice.spellbook.service.impl.SpellServiceImpl;
+import org.examle.aston_practice.spellbook.validator.SpellValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,8 +38,11 @@ public class SpellServiceTest {
     @Mock
     private SpellMapper spellMapper;
 
+    @Mock
+    private SpellValidator spellValidator;
+
     @InjectMocks
-    private SpellServiceImpl spellService;
+    private SpellServiceImpl spellServiceImpl;
 
     private SpellDTO spellDTO;
     private Spell spell;
@@ -61,10 +66,19 @@ public class SpellServiceTest {
     public void testCreateSpell() {
         when(spellMapper.toEntity(spellDTO)).thenReturn(spell);
         doNothing().when(spellRepository).save(spell);
+        doNothing().when(spellValidator).validate(spellDTO);
+        when(spellRepository.findByName(spellDTO.getName())).thenReturn(Optional.empty());
 
-        spellService.createSpell(spellDTO);
+        spellServiceImpl.createSpell(spellDTO);
 
         verify(spellRepository, times(1)).save(spell);
+    }
+
+    @Test
+    public void testCreateSpellAlreadyExists() {
+        when(spellRepository.findByName(spellDTO.getName())).thenReturn(Optional.of(spell));
+
+        assertThrows(IllegalArgumentException.class, () -> spellServiceImpl.createSpell(spellDTO));
     }
 
     @Test
@@ -72,7 +86,7 @@ public class SpellServiceTest {
         when(spellRepository.findById(1L)).thenReturn(Optional.of(spell));
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        Optional<SpellDTO> result = spellService.getSpellById(1L);
+        Optional<SpellDTO> result = spellServiceImpl.getSpellById(1L);
 
         assertTrue(result.isPresent());
         assertEquals(spellDTO, result.get());
@@ -82,7 +96,7 @@ public class SpellServiceTest {
     public void testGetSpellByIdNotFound() {
         when(spellRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(SpellNotFoundException.class, () -> spellService.getSpellById(1L));
+        assertThrows(SpellNotFoundException.class, () -> spellServiceImpl.getSpellById(1L));
     }
 
     @Test
@@ -90,7 +104,7 @@ public class SpellServiceTest {
         when(spellRepository.findByName("Fireball")).thenReturn(Optional.of(spell));
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        Optional<SpellDTO> result = spellService.getSpellByName("Fireball");
+        Optional<SpellDTO> result = spellServiceImpl.getSpellByName("Fireball");
 
         assertTrue(result.isPresent());
         assertEquals(spellDTO, result.get());
@@ -100,7 +114,7 @@ public class SpellServiceTest {
     public void testGetSpellByNameNotFound() {
         when(spellRepository.findByName("Fireball")).thenReturn(Optional.empty());
 
-        assertThrows(SpellNotFoundException.class, () -> spellService.getSpellByName("Fireball"));
+        assertThrows(SpellNotFoundException.class, () -> spellServiceImpl.getSpellByName("Fireball"));
     }
 
     @ParameterizedTest
@@ -110,7 +124,7 @@ public class SpellServiceTest {
         when(spellRepository.findByCasterClassAndCircle(casterClass, SpellCircle.THIRD)).thenReturn(spells);
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        List<SpellDTO> result = spellService.getSpellsByCasterClassAndCircle(casterClass, SpellCircle.THIRD);
+        List<SpellDTO> result = spellServiceImpl.getSpellsByCasterClassAndCircle(casterClass, SpellCircle.THIRD);
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
@@ -120,8 +134,9 @@ public class SpellServiceTest {
     public void testUpdateSpell() {
         when(spellMapper.toEntity(spellDTO)).thenReturn(spell);
         doNothing().when(spellRepository).update(spell);
+        doNothing().when(spellValidator).validate(spellDTO);
 
-        spellService.updateSpell(spellDTO);
+        spellServiceImpl.updateSpell(spellDTO);
 
         verify(spellRepository, times(1)).update(spell);
     }
@@ -130,7 +145,7 @@ public class SpellServiceTest {
     public void testDeleteSpell() {
         doNothing().when(spellRepository).deleteById(1L);
 
-        spellService.deleteSpell(1L);
+        spellServiceImpl.deleteSpell(1L);
 
         verify(spellRepository, times(1)).deleteById(1L);
     }
@@ -141,7 +156,7 @@ public class SpellServiceTest {
         when(spellRepository.findAll()).thenReturn(spells);
         when(spellMapper.toDto(spell)).thenReturn(spellDTO);
 
-        List<SpellDTO> result = spellService.getAllSpells();
+        List<SpellDTO> result = spellServiceImpl.getAllSpells();
 
         assertEquals(1, result.size());
         assertEquals(spellDTO, result.get(0));
@@ -155,7 +170,7 @@ public class SpellServiceTest {
         when(spellRepository.findCharactersBySpellName("Fireball")).thenReturn(characters);
         when(spellMapper.characterToDto(character)).thenReturn(characterDTO);
 
-        List<CharacterDTO> result = spellService.getCharactersBySpellName("Fireball");
+        List<CharacterDTO> result = spellServiceImpl.getCharactersBySpellName("Fireball");
 
         assertEquals(1, result.size());
         assertEquals(characterDTO, result.get(0));
