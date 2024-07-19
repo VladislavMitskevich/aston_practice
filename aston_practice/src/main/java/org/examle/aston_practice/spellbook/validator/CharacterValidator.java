@@ -2,7 +2,6 @@ package org.examle.aston_practice.spellbook.validator;
 
 import org.examle.aston_practice.spellbook.dto.CharacterDTO;
 import org.examle.aston_practice.spellbook.exception.InvalidInputException;
-import org.examle.aston_practice.spellbook.service.CharacterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,16 +10,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CharacterValidator {
     private final Logger logger = LoggerFactory.getLogger(CharacterValidator.class);
-    private final CharacterService characterService;
-
-    /**
-     * Constructor for CharacterValidator.
-     *
-     * @param characterService The CharacterService instance used to check for existing characters.
-     */
-    public CharacterValidator(CharacterService characterService) {
-        this.characterService = characterService;
-    }
 
     /**
      * Validates the given CharacterDTO object.
@@ -45,13 +34,6 @@ public class CharacterValidator {
         if (characterDTO.getLevel() < 1 || characterDTO.getLevel() > 20) {
             logger.error("Character level must be between 1 and 20. Received: {}", characterDTO.getLevel());
             throw new InvalidInputException("Character level must be between 1 and 20");
-        }
-
-        // Validate that the character name is unique
-        CharacterDTO existingCharacter = characterService.getCharacterByName(characterDTO.getName());
-        if (existingCharacter != null && !existingCharacter.getId().equals(characterDTO.getId())) {
-            logger.error("Character with name {} already exists", characterDTO.getName());
-            throw new InvalidInputException("Character with name " + characterDTO.getName() + " already exists");
         }
     }
 }

@@ -96,7 +96,6 @@ public class CharacterServiceImpl implements CharacterService {
 
     /**
      * Validates and creates a new character from the given DTO.
-     * Throws an IllegalArgumentException if a character with the same name already exists.
      *
      * @param characterDTO the DTO containing the character data to create
      */
@@ -104,9 +103,6 @@ public class CharacterServiceImpl implements CharacterService {
     public void createCharacter(CharacterDTO characterDTO) {
         logger.info("Creating character: {}", characterDTO);
         characterValidator.validate(characterDTO);
-        if (existsByCharacterName(characterDTO.getName())) {
-            throw new IllegalArgumentException("Character with name " + characterDTO.getName() + " already exists");
-        }
         Character character = characterMapper.toEntity(characterDTO);
         characterRepository.save(character);
     }

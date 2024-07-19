@@ -32,7 +32,7 @@ import java.util.Optional;
 @WebServlet("/characters")
 public class CharacterServlet extends HttpServlet {
 
-    private CharacterService characterService;
+    private CharacterServiceImpl characterService;
     private ObjectMapper objectMapper;
     private static final Logger logger = LoggerFactory.getLogger(CharacterServlet.class);
 
@@ -45,7 +45,7 @@ public class CharacterServlet extends HttpServlet {
     public void init() throws ServletException {
         SpellMapper spellMapper = new SpellMapper();
         CharacterMapper characterMapper = new CharacterMapper(spellMapper);
-        CharacterValidator characterValidator = new CharacterValidator(new CharacterServiceImpl(new CharacterRepositoryImpl(), new SpellRepositoryImpl(), characterMapper, new CharacterValidator(null)));
+        CharacterValidator characterValidator = new CharacterValidator();
         characterService = new CharacterServiceImpl(new CharacterRepositoryImpl(), new SpellRepositoryImpl(), characterMapper, characterValidator);
         objectMapper = new ObjectMapper();
         logger.info("CharacterServlet initialized");

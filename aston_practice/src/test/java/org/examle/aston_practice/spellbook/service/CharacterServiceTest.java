@@ -82,7 +82,6 @@ public class CharacterServiceTest {
         when(characterMapper.toEntity(characterDTO)).thenReturn(character);
         doNothing().when(characterRepository).save(character);
         doNothing().when(characterValidator).validate(characterDTO);
-        when(characterRepository.findByName(characterDTO.getName())).thenReturn(Optional.empty());
 
         // Call the service method
         characterServiceImpl.createCharacter(characterDTO);
